@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.utils.timezone import now
+from django.utils import timezone
 
 
 class Igreja(models.Model):
@@ -23,12 +23,14 @@ class Igreja(models.Model):
 
 class Dizimista(models.Model):
     nome = models.CharField(_("Nome completo"), max_length=50, null=False)
-    endereco = models.CharField(_("Endereço"), max_length=255, null=True)
-    nascimento = models.DateField(_("Data de nascimento"), null=True)
+    blank = dict(blank=True, null=True)
+    endereco = models.CharField(_("Endereço"), max_length=255, **blank)
+    nascimento = models.DateField(_("Data de nascimento"), **blank)
     generos = [("F", _("Feminino")), ("M", _("Masculino")), ("O", _("Outro"))]
     genero = models.CharField(max_length=1, choices=generos, default=generos[0][0])
-    telefone = models.CharField(_("Telefone"), max_length=17, null=True)
-    igreja = models.ForeignKey("gestao.Igreja", on_delete=models.SET_NULL, null=True)
+    telefone = models.CharField(_("Telefone"), max_length=17, **blank)
+    email = models.EmailField(_("Email"), **blank)
+    igreja = models.ForeignKey("gestao.Igreja", on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
         verbose_name = _("Dizimista")
@@ -45,7 +47,7 @@ class Pagamento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     igreja = models.ForeignKey("gestao.Igreja", on_delete=models.DO_NOTHING)
     dizimista = models.ForeignKey("gestao.Dizimista", on_delete=models.DO_NOTHING)
-    data = models.DateTimeField(_("Data e hora"), default=now())
+    data = models.DateTimeField(_("Data e hora"), default=timezone.now)
     valor = models.FloatField(_("Valor"))
 
     class Meta:

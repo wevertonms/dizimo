@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,6 +41,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "gestao",
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "DezPorcento",  # title of the window
+    "site_header": "DezPorcento",  # Title on the brand, and the login screen (19 chars max)
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -107,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "pt-br"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "America/Maceio"
 
 USE_I18N = True
 
