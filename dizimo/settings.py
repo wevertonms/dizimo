@@ -123,8 +123,14 @@ USE_L10N = False
 
 USE_TZ = True
 
+DATE_INPUT_FORMATS = (
+    "%d/%m/%Y",
+    "%d/%m/%y",
+)
+
 DATE_FORMAT = "d/m/y"
-DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
+TIME_FORMAT = "H:i"
+DATETIME_FORMAT = "d/m/y à\s H:i"  # noqa
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
