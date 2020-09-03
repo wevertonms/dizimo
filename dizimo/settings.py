@@ -24,10 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -117,10 +116,12 @@ TIME_ZONE = "America/Maceio"
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
+DATE_FORMAT = "d/m/y"
+DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
