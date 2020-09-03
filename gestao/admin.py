@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Dizimista, Igreja, Pagamento
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+from django.utils.html import format_html
+
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -76,10 +79,6 @@ class DizimistaAdmin(ImportExportModelAdmin):
     resource_class = DizimistaResource
 
 
-def número_de_dizimistas(obj):
-    return Dizimista.objects.filter(igreja=obj).count()
-
-
 class IgrejaResource(resources.ModelResource):
     class Meta:
         model = Igreja
@@ -87,9 +86,12 @@ class IgrejaResource(resources.ModelResource):
 
 @admin.register(Igreja)
 class IgrejaAdmin(ImportExportModelAdmin):
-    list_display = ("nome", "endereco", número_de_dizimistas)
+    list_display = ("nome", "endereco", "número_de_dizimistas")
     search_fields = ["nome"]
     resource_class = IgrejaResource
+
+    def número_de_dizimistas(self, obj):
+        return Dizimista.objects.filter(igreja=obj).count()
 
 
 class PagamentoResource(resources.ModelResource):
@@ -101,9 +103,25 @@ class PagamentoResource(resources.ModelResource):
 class PagamentoAdmin(ImportExportModelAdmin):
     resource_class = PagamentoResource
     list_per_page = 20
-    list_display = ("data", "valor", "igreja", "dizimista")
+    list_display = ("data", "valor", "dizimista_link")
     autocomplete_fields = ["igreja", "dizimista"]
     ordering = ["-data"]
     search_fields = ["igreja__nome", "dizimista__nome"]
     list_filter = ["igreja", "data", "registrado_por"]
     readonly_fields = ["data", "registrado_por"]
+
+    def save_model(self, request, obj, form, change):
+        print(request.user)
+        obj.registrado_por = request.user
+        super().save_model(request, obj, form, change)
+
+    def dizimista_link(self, obj):
+        dizimista = obj.dizimista
+        url = reverse(
+            f"admin:{dizimista._meta.app_label}_{dizimista._meta.model_name}_change",
+            args=(dizimista.pk,),
+        )
+        display_text = f"<a href={url}>{dizimista.nome}</a>"
+        return format_html(display_text)
+
+    dizimista_link.short_description = "Dizimista"
