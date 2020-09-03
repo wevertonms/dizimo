@@ -1,2 +1,1 @@
-web: gunicorn djangoherokuapp.wsgi --log-file -
-
+web: gunicorn dizimo.wsgi --log-file -
