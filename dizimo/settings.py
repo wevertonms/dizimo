@@ -140,6 +140,6 @@ if os.getcwd() == "/app":
     DATABASES["default"].update(db_from_url)
     # Honor the 'X-forwarded-Proto' header for request.is_secure().
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    ALLOWED_HOSTS = ["dezporcento.herokuapp.com/"]
+    ALLOWED_HOSTS = ["dezporcento.herokuapp.com"]
     DEBUG = True
     BASE_DIR = Path(__file__).absolute
