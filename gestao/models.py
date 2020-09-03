@@ -62,7 +62,7 @@ class Pagamento(models.Model):
         verbose_name_plural = _("Pagamentos")
 
     def __str__(self):
-        return str(self.id)
+        return f"R$ {self.valor} em {self.data}"
 
     def get_absolute_url(self):
         return reverse("Pagamento_detail", kwargs={"pk": self.pk})
