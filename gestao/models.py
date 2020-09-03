@@ -49,7 +49,7 @@ class Pagamento(models.Model):
     igreja = models.ForeignKey("gestao.Igreja", on_delete=models.DO_NOTHING)
     dizimista = models.ForeignKey("gestao.Dizimista", on_delete=models.DO_NOTHING)
     data = models.DateTimeField(_("Data e hora"), default=timezone.now)
-    valor = models.FloatField(_("Valor"))
+    valor = models.DecimalField(_("Valor"), max_digits=14, decimal_places=2)
     registrado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Registrado por"),
