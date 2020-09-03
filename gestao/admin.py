@@ -1,6 +1,8 @@
 from django.contrib import admin
 from .models import Dizimista, Igreja, Pagamento
 from django.utils.translation import gettext_lazy as _
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
@@ -53,8 +55,13 @@ def endereco(obj):
     return f"{obj.endereco[:30]} ..."
 
 
+class DizimistaResource(resources.ModelResource):
+    class Meta:
+        model = Dizimista
+
+
 @admin.register(Dizimista)
-class DizimistaAdmin(admin.ModelAdmin):
+class DizimistaAdmin(ImportExportModelAdmin):
     list_per_page = 20
     list_display = (
         "nome",
@@ -66,20 +73,33 @@ class DizimistaAdmin(admin.ModelAdmin):
     autocomplete_fields = ["igreja"]
     search_fields = ["nome"]
     list_filter = ["igreja", "genero", AniversarioMesListFilter]
+    resource_class = DizimistaResource
 
 
 def número_de_dizimistas(obj):
     return Dizimista.objects.filter(igreja=obj).count()
 
 
+class IgrejaResource(resources.ModelResource):
+    class Meta:
+        model = Igreja
+
+
 @admin.register(Igreja)
-class IgrejaAdmin(admin.ModelAdmin):
+class IgrejaAdmin(ImportExportModelAdmin):
     list_display = ("nome", "endereco", número_de_dizimistas)
     search_fields = ["nome"]
+    resource_class = IgrejaResource
+
+
+class PagamentoResource(resources.ModelResource):
+    class Meta:
+        model = Pagamento
 
 
 @admin.register(Pagamento)
-class PagamentoAdmin(admin.ModelAdmin):
+class PagamentoAdmin(ImportExportModelAdmin):
+    resource_class = PagamentoResource
     list_per_page = 20
     list_display = ("data", "valor", "igreja", "dizimista")
     autocomplete_fields = ["igreja", "dizimista"]
