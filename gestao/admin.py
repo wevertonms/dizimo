@@ -103,7 +103,7 @@ class PagamentoAdmin(ImportExportModelAdmin):
     list_per_page = 20
     list_display = ("data", "valor", "igreja", "dizimista")
     autocomplete_fields = ["igreja", "dizimista"]
-    ordering = ["data"]
+    ordering = ["-data"]
     search_fields = ["igreja__nome", "dizimista__nome"]
     list_filter = ["igreja", "data", "registrado_por"]
     readonly_fields = ["data", "registrado_por"]
