@@ -55,12 +55,14 @@ def endereco(obj):
 
 @admin.register(Dizimista)
 class DizimistaAdmin(admin.ModelAdmin):
+    list_per_page = 20
     list_display = (
         "nome",
         "nascimento",
         endereco,
         "telefone",
     )
+    ordering = ["nome"]
     autocomplete_fields = ["igreja"]
     search_fields = ["nome"]
     list_filter = ["igreja", "genero", AniversarioMesListFilter]
@@ -78,9 +80,10 @@ class IgrejaAdmin(admin.ModelAdmin):
 
 @admin.register(Pagamento)
 class PagamentoAdmin(admin.ModelAdmin):
+    list_per_page = 20
     list_display = ("data", "valor", "igreja", "dizimista")
     autocomplete_fields = ["igreja", "dizimista"]
     ordering = ["data"]
     search_fields = ["igreja__nome", "dizimista__nome"]
-    list_filter = ["igreja", "data"]
-    readonly_fields = ["data"]
+    list_filter = ["igreja", "data", "registrado_por"]
+    readonly_fields = ["data", "registrado_por"]

@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.conf import settings
 
 
 class Igreja(models.Model):
@@ -49,6 +50,12 @@ class Pagamento(models.Model):
     dizimista = models.ForeignKey("gestao.Dizimista", on_delete=models.DO_NOTHING)
     data = models.DateTimeField(_("Data e hora"), default=timezone.now)
     valor = models.FloatField(_("Valor"))
+    registrado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Registrado por"),
+        on_delete=models.SET_NULL,
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("Pagamento")
