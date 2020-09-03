@@ -129,6 +129,7 @@ DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATICFILES_DIRS = (BASE_DIR / STATIC_URL,)
 
 if os.getcwd() == "/app":
     import dj_database_url
