@@ -66,3 +66,10 @@ class Pagamento(models.Model):
 
     def get_absolute_url(self):
         return reverse("Pagamento_detail", kwargs={"pk": self.pk})
+
+
+class RelatorioPagameneto(Pagamento):
+    class Meta:
+        proxy = True
+        verbose_name = "Relatório de Pagamentos"
+        verbose_name_plural = "Relatórios de Pagamentos"
