@@ -13,6 +13,18 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 
+import environ
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, True)
+)
+# reading .env file
+environ.Env.read_env()
+
+# False if not in os.environ
+DEBUG = env("DEBUG")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,12 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY", "c%h%(5a^#n@bd!!f(3@)bt#(cqz&(c0_x4ymy!fv-i!n0zpg@p"
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", True)
+SECRET_KEY = env("SECRET_KEY")
 
 ALLOWED_HOSTS = []
 
@@ -141,6 +148,16 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # STATICFILES_DIRS = (BASE_DIR / STATIC_URL,)
 
+
+# Email
+# https://docs.djangoproject.com/en/3.1/topics/email/#email-backends
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+EMAIL_USE_SSL = env("EMAIL_USE_SSL")
+
 if os.getcwd() == "/app":
     import dj_database_url
 
@@ -149,5 +166,5 @@ if os.getcwd() == "/app":
     # Honor the 'X-forwarded-Proto' header for request.is_secure().
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     ALLOWED_HOSTS = ["dezporcento.herokuapp.com"]
-    DEBUG = True
+    DEBUG = False
     BASE_DIR = Path(__file__).absolute

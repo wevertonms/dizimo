@@ -7,6 +7,7 @@
         "Genero",
         "gestao",
         "noqa",
-        "pylint"
+        "pylint",
+        "strftime"
     ]
 }

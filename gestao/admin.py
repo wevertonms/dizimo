@@ -1,15 +1,51 @@
+import csv
+
 from django.contrib import admin
 from .models import Dizimista, Igreja, Pagamento
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from django.utils.html import format_html
-
-from import_export import resources
-from import_export.admin import ImportExportModelAdmin
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.utils.timezone import now, datetime
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
 admin.site.index_title = "Registros"
+
+
+class ExportCsvMixin:
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        field_names = [field.name for field in meta.fields]
+        response = HttpResponse(content_type="text/csv")
+        filename = f'{str(meta).replace(".", "_")}s_{now().strftime("%Y_%m_%d")}'
+        response["Content-Disposition"] = f"attachment; filename={filename}.csv"
+        writer = csv.writer(response)
+        writer.writerow([field.verbose_name for field in meta.fields])
+        for obj in queryset:
+            _ = writer.writerow([getattr(obj, field) for field in field_names])
+        return response
+
+    export_as_csv.short_description = "Exportar como CSV"
+
+
+def filter_month_by_lookups(self, request, model_admin):  # noqa
+    """Returns a list of tuples. The first element in each tuple is the coded value
+    for the option that will appear in the URL query. The second element is the
+    human-readable name for the option that will appear in the right sidebar.
+    """
+    return [(str(i), _(datetime(1, i, 1).strftime("%B"))) for i in range(1, 13)]
+
+
+def filter_month_by_queryset(self, request, queryset, field):
+    """Returns the filtered queryset based on the value provided in the query
+    string and retrievable via `self.value()`.
+    """
+    if self.value():
+        filter_kwargs = {field: self.value()}
+        return queryset.filter(**filter_kwargs)
+    return queryset
 
 
 class AniversarioMesListFilter(admin.SimpleListFilter):
@@ -21,50 +57,18 @@ class AniversarioMesListFilter(admin.SimpleListFilter):
     parameter_name = "aniversario_mes"
 
     def lookups(self, request, model_admin):
-        """
-        Returns a list of tuples. The first element in each
-        tuple is the coded value for the option that will
-        appear in the URL query. The second element is the
-        human-readable name for the option that will appear
-        in the right sidebar.
-        """
-        return (
-            ("1", _("Janeiro")),
-            ("2", _("Fevereiro")),
-            ("3", _("Março")),
-            ("4", _("Abril")),
-            ("5", _("Maio")),
-            ("6", _("Junho")),
-            ("7", _("Julho")),
-            ("8", _("Agosto")),
-            ("9", _("Setembro")),
-            ("10", _("Outrubro")),
-            ("11", _("Novembro")),
-            ("12", _("Dezembro")),
-        )
+        return filter_month_by_lookups(self, request, model_admin)
 
     def queryset(self, request, queryset):
-        """
-        Returns the filtered queryset based on the value
-        provided in the query string and retrievable via
-        `self.value()`.
-        """
-        if self.value():
-            return queryset.filter(nascimento__month=self.value())
-        return queryset
+        filter_month_by_queryset(self, request, queryset, field="nascimento__month")
 
 
 def endereco(obj):
     return f"{obj.endereco[:30]} ..."
 
 
-class DizimistaResource(resources.ModelResource):
-    class Meta:
-        model = Dizimista
-
-
 @admin.register(Dizimista)
-class DizimistaAdmin(ImportExportModelAdmin):
+class DizimistaAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_per_page = 20
     list_display = (
         "nome",
@@ -76,44 +80,67 @@ class DizimistaAdmin(ImportExportModelAdmin):
     autocomplete_fields = ["igreja"]
     search_fields = ["nome"]
     list_filter = ["igreja", "genero", AniversarioMesListFilter]
-    resource_class = DizimistaResource
-
-
-class IgrejaResource(resources.ModelResource):
-    class Meta:
-        model = Igreja
+    actions = ["export_as_csv"]
 
 
 @admin.register(Igreja)
-class IgrejaAdmin(ImportExportModelAdmin):
+class IgrejaAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_display = ("nome", "endereco", "número_de_dizimistas")
     search_fields = ["nome"]
-    resource_class = IgrejaResource
+    actions = ["export_as_csv"]
 
     def número_de_dizimistas(self, obj):
         return Dizimista.objects.filter(igreja=obj).count()
 
 
-class PagamentoResource(resources.ModelResource):
-    class Meta:
-        model = Pagamento
+class MesListFilter(admin.SimpleListFilter):
+    title = _("Mês")
+    parameter_name = "mes"
+
+    def lookups(self, request, model_admin):
+        return filter_month_by_lookups(self, request, model_admin)
+
+    def queryset(self, request, queryset):
+        return filter_month_by_queryset(self, request, queryset, field="data__month")
 
 
 @admin.register(Pagamento)
-class PagamentoAdmin(ImportExportModelAdmin):
-    resource_class = PagamentoResource
+class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
+    fields = ("igreja", "dizimista", "valor", "data", "registrado_por")
     list_per_page = 20
     list_display = ("data", "valor", "dizimista_link")
     autocomplete_fields = ["igreja", "dizimista"]
     ordering = ["-data"]
     search_fields = ["igreja__nome", "dizimista__nome"]
-    list_filter = ["igreja", "data", "registrado_por"]
-    readonly_fields = ["data", "registrado_por"]
+    list_filter = ["igreja", "data", "registrado_por", MesListFilter]
+    actions = ["export_as_csv"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return []
+        return ["data", "registrado_por", "id"]
 
     def save_model(self, request, obj, form, change):
-        print(request.user)
         obj.registrado_por = request.user
         super().save_model(request, obj, form, change)
+        try:
+            destinatários = [request.user.mail]
+            send_mail(
+                subject="Pagamento adicionado",
+                message=f"""
+    Dizimista: {obj.dizimista}
+    Igreja: {obj.igreja}
+    Data: {obj.data}
+    Valor: {obj.valor}
+    Registrado_por: {obj.registrado_por}
+    Código do pagamento: {obj.id}
+    """,
+                from_email="naoresponda@dezporcento.com",
+                recipient_list=destinatários,
+                fail_silently=True,
+            )
+        except Exception as e:
+            print(e)
 
     def dizimista_link(self, obj):
         dizimista = obj.dizimista
@@ -125,3 +152,9 @@ class PagamentoAdmin(ImportExportModelAdmin):
         return format_html(display_text)
 
     dizimista_link.short_description = "Dizimista"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # if not request.user.is_superuser:
+        #     return qs.filter(registrado_por=request.user)
+        return qs
