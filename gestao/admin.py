@@ -60,7 +60,9 @@ class AniversarioMesListFilter(admin.SimpleListFilter):
         return filter_month_by_lookups(self, request, model_admin)
 
     def queryset(self, request, queryset):
-        filter_month_by_queryset(self, request, queryset, field="nascimento__month")
+        return filter_month_by_queryset(
+            self, request, queryset, field="nascimento__month"
+        )
 
 
 def endereco(obj):
