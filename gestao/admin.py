@@ -35,7 +35,7 @@ def filter_month_by_lookups(self, request, model_admin):  # noqa
     for the option that will appear in the URL query. The second element is the
     human-readable name for the option that will appear in the right sidebar.
     """
-    return [(str(i), _(datetime(1, i, 1).strftime("%B"))) for i in range(1, 13)]
+    return [(i, _(datetime(1, i, 1).strftime("%B"))) for i in range(1, 13)]
 
 
 def filter_month_by_queryset(self, request, queryset, field):

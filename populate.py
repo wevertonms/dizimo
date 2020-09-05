@@ -3,8 +3,9 @@ from faker import Faker
 from random import choice
 from gestao.models import Dizimista, Igreja, Pagamento
 from django.contrib.auth.models import User
+from django.utils import timezone
 
-faker = Faker("pt-BR")
+FAKER = Faker("pt-BR")
 
 USERS = User.objects.filter(is_superuser=False)
 IGREJAS = Igreja.objects.all()
@@ -12,7 +13,7 @@ PAGAMENTOS_VALORES = (20, 30, 40, 50, 70, 100, 200)
 
 
 def get_endereco():
-    return faker.address().split("\n")[0]
+    return FAKER.address().split("\n")[0]
 
 
 def add_pagamentos(dizimista, from_last_n_months, to_n_last_month):
@@ -20,7 +21,7 @@ def add_pagamentos(dizimista, from_last_n_months, to_n_last_month):
         p = Pagamento(
             dizimista=dizimista,
             igreja=dizimista.igreja,
-            data=faker.date_time_between(f"-{m}M", f"-{m-1}M"),
+            data=timezone.make_aware(FAKER.date_time_between(f"-{m}M", f"-{m-1}M")),
             valor=choice(PAGAMENTOS_VALORES),
             registrado_por=choice(USERS),
         )
@@ -28,14 +29,14 @@ def add_pagamentos(dizimista, from_last_n_months, to_n_last_month):
 
 
 def get_dizimista(igrejas=IGREJAS):
-    p = faker.simple_profile()
+    profile = FAKER.simple_profile()
     dados = dict(
-        nome=p["name"],
-        genero=p["sex"],
+        nome=profile["name"],
+        genero=profile["sex"],
         endereco=get_endereco(),
-        nascimento=faker.date_between("-70y", "-20y"),
-        telefone=faker.phone_number(),
-        email=p["mail"],
+        nascimento=FAKER.date_between("-70y", "-20y"),
+        telefone=FAKER.phone_number(),
+        email=profile["mail"],
         igreja=choice(igrejas),
     )
     return Dizimista(**dados)

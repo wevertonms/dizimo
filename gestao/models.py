@@ -47,7 +47,9 @@ class Dizimista(models.Model):
 class Pagamento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     igreja = models.ForeignKey("gestao.Igreja", on_delete=models.DO_NOTHING)
-    dizimista = models.ForeignKey("gestao.Dizimista", on_delete=models.DO_NOTHING)
+    dizimista = models.ForeignKey(
+        "gestao.Dizimista", on_delete=models.SET_NULL, null=True
+    )
     data = models.DateTimeField(_("Data e hora"), default=timezone.now)
     valor = models.DecimalField(_("Valor"), max_digits=14, decimal_places=2)
     registrado_por = models.ForeignKey(
@@ -68,7 +70,7 @@ class Pagamento(models.Model):
         return reverse("Pagamento_detail", kwargs={"pk": self.pk})
 
 
-class RelatorioPagameneto(Pagamento):
+class RelatorioPagamentos(Pagamento):
     class Meta:
         proxy = True
         verbose_name = "Relatório de Pagamentos"
