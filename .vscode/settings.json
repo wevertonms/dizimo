@@ -5,6 +5,7 @@
     "python.testing.nosetestsEnabled": false,
     "cSpell.words": [
         "Genero",
+        "Unregister",
         "gestao",
         "noqa",
         "pylint",
