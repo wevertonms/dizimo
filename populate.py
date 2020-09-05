@@ -1,4 +1,3 @@
-from gestao.admin import endereco
 from faker import Faker
 from random import choice
 from gestao.models import Dizimista, Igreja, Pagamento

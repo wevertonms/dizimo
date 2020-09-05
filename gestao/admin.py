@@ -5,14 +5,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
-from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.timezone import datetime, now
 from django.utils.translation import gettext_lazy as _
 
-from .models import Dizimista, Igreja, Pagamento, RelatorioPagamentos
+from .models import Dizimista, Igreja, Pagamento
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
@@ -48,13 +47,13 @@ admin.site.unregister(User)
 class CustomUserAdmin(UserAdmin):
     readonly_fields = ["date_joined"]
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(username=request.user.username)
 
-    def get_form(self, request, obj=None, **kwargs):
+    def get_form(self, request: HttpRequest, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         is_superuser = request.user.is_superuser
         disabled_fields = set(["last_login"])
@@ -72,7 +71,7 @@ class CustomUserAdmin(UserAdmin):
                 form.base_fields[field].disabled = True
         return form
 
-    def save_model(self, request, obj: User, form, change):
+    def save_model(self, request: HttpRequest, obj: User, form, change):
         obj.registrado_por = request.user
         is_new_user = not obj.pk
         if is_new_user:
@@ -89,7 +88,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 class ExportCsvMixin:
-    def export_as_csv(self, request, queryset):
+    def export_as_csv(self, request: HttpRequest, queryset):
         meta = self.model._meta
         field_names = [field.name for field in meta.fields]
         response = HttpResponse(content_type="text/csv")
@@ -104,7 +103,7 @@ class ExportCsvMixin:
     export_as_csv.short_description = "Exportar como CSV"
 
 
-def filter_month_by_lookups(self, request, model_admin):  # noqa
+def filter_month_by_lookups(self, request: HttpRequest, model_admin):  # noqa
     """Returns a list of tuples. The first element in each tuple is the coded value
     for the option that will appear in the URL query. The second element is the
     human-readable name for the option that will appear in the right sidebar.
@@ -112,7 +111,7 @@ def filter_month_by_lookups(self, request, model_admin):  # noqa
     return [(i, _(datetime(1, i, 1).strftime("%B"))) for i in range(1, 13)]
 
 
-def filter_month_by_queryset(self, request, queryset, field):
+def filter_month_by_queryset(self, request: HttpRequest, queryset, field):
     """Returns the filtered queryset based on the value provided in the query
     string and retrievable via `self.value()`.
     """
@@ -122,7 +121,7 @@ def filter_month_by_queryset(self, request, queryset, field):
     return queryset
 
 
-class MesListFilter(admin.SimpleListFilter):
+class DataMonthListFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
     title = _("Mês")
@@ -130,14 +129,14 @@ class MesListFilter(admin.SimpleListFilter):
     parameter_name = "mes"
     field = "data__month"
 
-    def lookups(self, request, model_admin):
+    def lookups(self, request: HttpRequest, model_admin):
         return filter_month_by_lookups(self, request, model_admin)
 
-    def queryset(self, request, queryset):
+    def queryset(self, request: HttpRequest, queryset):
         return filter_month_by_queryset(self, request, queryset, field=self.field)
 
 
-class AniversarioMesListFilter(MesListFilter):
+class AniversarioMesListFilter(DataMonthListFilter):
     title = _("Anversariante do mês")
     parameter_name = "aniversario_mes"
     field = "nascimento__month"
@@ -181,15 +180,15 @@ class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
     autocomplete_fields = ["igreja", "dizimista"]
     ordering = ["-data"]
     search_fields = ["igreja__nome", "dizimista__nome"]
-    list_filter = ["igreja", "data", "registrado_por", MesListFilter]
+    list_filter = ["igreja", "data", "registrado_por", DataMonthListFilter]
     actions = ["export_as_csv"]
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request: HttpRequest, obj=None):
         if request.user.is_superuser:
             return []
         return ["data", "registrado_por", "id"]
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request: HttpRequest, obj, form, change):
         obj.registrado_por = request.user
         super().save_model(request, obj, form, change)
         try:
@@ -222,13 +221,8 @@ class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
 
     dizimista_link.short_description = "Dizimista"
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
         # if not request.user.is_superuser:
         # return qs.filter(registrado_por=request.user)
         return qs
-
-
-# @admin.register(RelatorioPagamentos)
-# class RelatorioPagamentosAdmin(admin.ModelAdmin):
-#     pass
