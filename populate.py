@@ -60,32 +60,34 @@ def adicionar_dizimistas_e_pagamentos(
         add_pagamentos(d, from_last_n_months, to_n_last_month)
 
 
-def adicionar_igrejas(n=1):
-    for i in range(1, n + 1):
-        agente = User.objects.create_user(
-            username=f"agente{i}",
-            password=f"agente{i}",
-            is_staff=True,
-            first_name=FAKER.first_name(),
-        )  # type: User
-        agente.groups.add(AGENTES_GROUP())
-        agente.save()
-        gestor = User.objects.create_user(
-            username=f"gestor{i}",
-            password=f"gestor{i}",
-            is_staff=True,
-            first_name=FAKER.first_name(),
-        )  # type: User
-        gestor.groups.add(GESTORES_GROUP())
-        gestor.save()
+def adicionar_igrejas(num_igrejas=1, gestores_por_igreja=1, agentes_por_igreja=2):
+    for i in range(1, num_igrejas + 1):
         igreja = Igreja.objects.create(
             nome=f"Igreja {i}", endereco=get_endereco()
         )  # type: Igreja
         print(f"{igreja} adicionada...")
-        igreja.agentes.add(agente)
-        print(f"Agente {(agente)} adicionado...")
-        igreja.gestores.add(gestor)
-        print(f"Gestor {(gestor)} adicionado...")
+        for j in range(agentes_por_igreja):
+            agente = User.objects.create_user(
+                username=f"agente{i*agentes_por_igreja + j}",
+                password=f"agente{i*agentes_por_igreja + j}",
+                is_staff=True,
+                first_name=FAKER.first_name(),
+            )  # type: User
+            agente.groups.add(AGENTES_GROUP())
+            agente.save()
+            igreja.agentes.add(agente)
+            print(f"Agente {(agente)} adicionado...")
+        for j in range(gestores_por_igreja):
+            gestor = User.objects.create_user(
+                username=f"gestor{i*gestores_por_igreja + j}",
+                password=f"gestor{i*gestores_por_igreja + j}",
+                is_staff=True,
+                first_name=FAKER.first_name(),
+            )  # type: User
+            gestor.groups.add(GESTORES_GROUP())
+            gestor.save()
+            igreja.gestores.add(gestor)
+            print(f"Gestor {(gestor)} adicionado...")
         igreja.save()
 
 
