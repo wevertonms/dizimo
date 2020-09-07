@@ -17,9 +17,6 @@ admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
 admin.site.index_title = "Registros"
 
-AGENTES_GROUP = None
-GESTORES_GROUP = None
-
 
 def igrejas_do_usuário(user):
     gestor_em = Q(gestores__pk=user.pk)
@@ -41,10 +38,9 @@ def user_str(user: User):
 admin.site.unregister(User)
 
 
-def create_groups():
-    global GESTORES_GROUP
-    GESTORES_GROUP = Group.objects.get_or_create(name="Gestores da pastoral")[0]
-    GESTORES_GROUP.permissions.set(
+def GESTORES_GROUP():
+    gestores_group = Group.objects.get_or_create(name="Gestores da pastoral")[0]
+    gestores_group.permissions.set(
         (
             get_permission(User, "view"),
             get_permission(User, "change"),
@@ -58,10 +54,13 @@ def create_groups():
             get_permission(Igreja, "view"),
         )
     )
-    GESTORES_GROUP.save()
-    global AGENTES_GROUP
-    AGENTES_GROUP = Group.objects.get_or_create(name="Agentes da pastoral")[0]
-    AGENTES_GROUP.permissions.set(
+    gestores_group.save()
+    return gestores_group
+
+
+def AGENTES_GROUP():
+    agentes_group = Group.objects.get_or_create(name="Agentes da pastoral")[0]
+    agentes_group.permissions.set(
         (
             get_permission(User, "view"),
             get_permission(User, "change"),
@@ -73,7 +72,8 @@ def create_groups():
             get_permission(Pagamento, "add"),
         )
     )
-    AGENTES_GROUP.save()
+    agentes_group.save()
+    return agentes_group
 
 
 @admin.register(User)
