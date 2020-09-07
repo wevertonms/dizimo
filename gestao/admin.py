@@ -7,16 +7,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
-from django.urls import reverse
-from django.utils.html import format_html
 from django.utils.timezone import datetime, now
 from django.utils.translation import gettext_lazy as _
 
 from .models import Dizimista, Igreja, Pagamento
 
+
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
 admin.site.index_title = "Registros"
+
+AGENTES_GROUP = None
+GESTORES_GROUP = None
 
 
 def igrejas_do_usuário(user):
@@ -39,37 +41,39 @@ def user_str(user: User):
 admin.site.unregister(User)
 
 
-# def create_groups():
-GESTORES_GROUP = Group.objects.get_or_create(name="Gestores da pastoral")[0]
-GESTORES_GROUP.permissions.set(
-    (
-        get_permission(User, "view"),
-        get_permission(User, "change"),
-        get_permission(Dizimista, "view"),
-        get_permission(Dizimista, "add"),
-        get_permission(Dizimista, "change"),
-        get_permission(Dizimista, "delete"),
-        get_permission(Pagamento, "view"),
-        get_permission(Pagamento, "add"),
-        get_permission(Pagamento, "change"),
-        get_permission(Igreja, "view"),
+def create_groups():
+    global GESTORES_GROUP
+    GESTORES_GROUP = Group.objects.get_or_create(name="Gestores da pastoral")[0]
+    GESTORES_GROUP.permissions.set(
+        (
+            get_permission(User, "view"),
+            get_permission(User, "change"),
+            get_permission(Dizimista, "view"),
+            get_permission(Dizimista, "add"),
+            get_permission(Dizimista, "change"),
+            get_permission(Dizimista, "delete"),
+            get_permission(Pagamento, "view"),
+            get_permission(Pagamento, "add"),
+            get_permission(Pagamento, "change"),
+            get_permission(Igreja, "view"),
+        )
     )
-)
-GESTORES_GROUP.save()
-AGENTES_GROUP = Group.objects.get_or_create(name="Agentes da pastoral")[0]
-AGENTES_GROUP.permissions.set(
-    (
-        get_permission(User, "view"),
-        get_permission(User, "change"),
-        get_permission(Dizimista, "view"),
-        get_permission(Dizimista, "add"),
-        get_permission(Dizimista, "change"),
-        get_permission(Igreja, "view"),
-        get_permission(Pagamento, "view"),
-        get_permission(Pagamento, "add"),
+    GESTORES_GROUP.save()
+    global AGENTES_GROUP
+    AGENTES_GROUP = Group.objects.get_or_create(name="Agentes da pastoral")[0]
+    AGENTES_GROUP.permissions.set(
+        (
+            get_permission(User, "view"),
+            get_permission(User, "change"),
+            get_permission(Dizimista, "view"),
+            get_permission(Dizimista, "add"),
+            get_permission(Dizimista, "change"),
+            get_permission(Igreja, "view"),
+            get_permission(Pagamento, "view"),
+            get_permission(Pagamento, "add"),
+        )
     )
-)
-AGENTES_GROUP.save()
+    AGENTES_GROUP.save()
 
 
 @admin.register(User)
