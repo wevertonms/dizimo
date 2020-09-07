@@ -68,7 +68,7 @@ def adicionar_igrejas(n=1):
             is_staff=True,
             first_name=FAKER.first_name(),
         )  # type: User
-        agente.groups.add(AGENTES_GROUP)
+        agente.groups.add(AGENTES_GROUP())
         agente.save()
         gestor = User.objects.create_user(
             username=f"gestor{i}",
@@ -76,7 +76,7 @@ def adicionar_igrejas(n=1):
             is_staff=True,
             first_name=FAKER.first_name(),
         )  # type: User
-        gestor.groups.add(GESTORES_GROUP)
+        gestor.groups.add(GESTORES_GROUP())
         gestor.save()
         igreja = Igreja.objects.create(
             nome=f"Igreja {i}", endereco=get_endereco()
