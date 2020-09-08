@@ -1,0 +1,29 @@
+<div class="results card">
+    <div class="card-body table-responsive p-0">
+      <table class="table table-striped">
+
+      <thead>
+        <tr>
+          {% for h in headers %}
+            <th>
+                <div class="text">
+                  <a href="#">{{ h | title }}</a>
+                </div>
+              </th>
+          {% endfor %}
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for row in data %}
+        <tr class="{% cycle "row1" "row2" %}">
+          {% for col in row.values %}
+            <td> {{ col }} </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+
+    </table>
+  </div>
+</div>

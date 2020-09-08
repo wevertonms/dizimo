@@ -5,10 +5,10 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
-from django.db.models import Q, Count, Sum, QuerySet
+from django.db.models import Q, Count, Sum
 from django.db.models.functions import TruncMonth
 from django.http import HttpRequest, HttpResponse
-from django.utils.timezone import datetime, now
+from django.utils.timezone import datetime, now, timedelta, make_aware
 from django.utils.translation import gettext_lazy as _
 
 from .models import Dizimista, Igreja, Pagamento, ResumoMensal
@@ -23,6 +23,14 @@ def igrejas_do_usuário(user):
     gestor_em = Q(gestores__pk=user.pk)
     agente_em = Q(agentes__pk=user.pk)
     return Igreja.objects.filter(agente_em | gestor_em)
+
+
+def dizimistas_do_usuário(user):
+    qs = Dizimista.objects.all()  # super().get_queryset(request)
+    if user.is_superuser:
+        return qs
+    igrejas = igrejas_do_usuário(user)
+    return qs.filter(igreja__in=igrejas)
 
 
 def get_permission(model, permission: str):
@@ -143,7 +151,7 @@ class ExportCsvMixin:
             _ = writer.writerow([getattr(obj, field) for field in field_names])
         return response
 
-    export_as_csv.short_description = "Exportar como CSV"
+    export_as_csv.short_description = "Exportar dados em CSV"
 
 
 class DataMonthListFilter(admin.SimpleListFilter):
@@ -205,6 +213,20 @@ class IgrejaListFilter(admin.SimpleListFilter):
         return queryset
 
 
+class UltimoPagamentoListFilter(admin.SimpleListFilter):
+    title = _("Último Pagamento")
+    parameter_name = "ultimopagamento"
+
+    def lookups(self, request: HttpRequest, model_admin):  # noqa
+        return [(i, _(f"{i} dias atrás")) for i in [30, 60, 90]]
+
+    def queryset(self, request: HttpRequest, queryset):
+        if self.value():
+            dias_atras = now() - timedelta(days=int(self.value()) + 1)
+            return queryset.exclude(pagamento__data__gt=dias_atras)
+        return queryset
+
+
 @admin.register(Dizimista)
 class DizimistaAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_per_page = 20
@@ -216,20 +238,18 @@ class DizimistaAdmin(admin.ModelAdmin, ExportCsvMixin):
     )
     ordering = ["nome"]
     search_fields = ["nome"]
-    list_filter = [IgrejaListFilter, "genero", AniversarioMesListFilter]
+    list_filter = [
+        IgrejaListFilter,
+        "genero",
+        AniversarioMesListFilter,
+        UltimoPagamentoListFilter,
+    ]
     actions = ["export_as_csv"]
     autocomplete_fields = ["igreja"]
     inlines = (PagamentoInline,)
 
     def get_queryset(self, request: HttpRequest):
-        qs = super().get_queryset(request)
-        user = request.user
-        if user.is_superuser:
-            return qs
-        gestor_em = Q(gestores__pk=user.pk)
-        agente_em = Q(agentes__pk=user.pk)
-        igrejas = Igreja.objects.filter(agente_em | gestor_em)
-        return qs.filter(igreja__in=igrejas)
+        return dizimistas_do_usuário(user=request.user)
 
 
 class DizimistaInline(admin.TabularInline):
@@ -368,16 +388,15 @@ class ResumoMensalAdmin(admin.ModelAdmin):
         except (AttributeError, KeyError):
             return response
 
-        metrics = {
-            "pagamentos": Count("id"),
-            "total_recebido": Sum("valor"),
-        }
-        data = list(
+        metrics = {"pagamentos": Count("id"), "total_recebido": Sum("valor")}
+        data = (
             qs.annotate(mês=TruncMonth("data"))
             .order_by("-mês")
             .values("mês", "igreja__nome")
             .annotate(**metrics)
         )
-        # print(data)
-        response.context_data["resumo"] = data
+        for d in data:
+            d["mês"] = d["mês"].strftime("%m / %Y")
+        response.context_data["data"] = data
+        response.context_data["headers"] = ["Igreja", "Mês", "Pagamentos", "Total (R$)"]
         return response

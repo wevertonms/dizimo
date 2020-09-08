@@ -5,49 +5,8 @@
 {% load humanize %}
 
 {% block result_list %}
-  <div class="results card">
-    <div class="card-body table-responsive p-0">
-      <table class="table table-striped">
 
-      <thead>
-        <tr>
-          <th>
-            <div class="text">
-              <a href="#">Mês</a>
-            </div>
-          </th>
-          <th>
-            <div class="text">
-              <a href="#">Igreja</a>
-            </div>
-          </th>
-          <th>
-            <div class="text">
-              <a href="#">Pagamentos</a>
-            </div>
-          </th>
-          <th>
-            <div class="text">
-              <a href="#">Total recebido (R$)</a>
-            </div>
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for row in resumo %}
-        <tr class="{% cycle 'row1' 'row2' %}">
-          <td> {{ row.mês | date:"F / Y" }} </td>
-          <td> {{ row.igreja__nome }} </td>
-          <td> {{ row.pagamentos | intcomma }} </td>
-          <td> {{ row.total_recebido | intcomma }} </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-
-    </table>
-  </div>
-</div>
+  {% include "admin/table.html" %}
 
 {% endblock %}
 

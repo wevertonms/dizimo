@@ -34,13 +34,17 @@ class Igreja(models.Model):
 
 class Dizimista(models.Model):
     nome = models.CharField(_("Nome completo"), max_length=50, null=False)
-    blank = dict(blank=True, null=True)
-    endereco = models.CharField(_("Endereço"), max_length=255, **blank)
-    nascimento = models.DateField(_("Data de nascimento"), **blank)
-    generos = [("F", _("Feminino")), ("M", _("Masculino")), ("O", _("Outro"))]
+    blank_opts = dict(blank=True, null=True)
+    endereco = models.CharField(_("Endereço"), max_length=255, **blank_opts)
+    nascimento = models.DateField(_("Data de nascimento"), **blank_opts)
+    generos = [
+        ("F", _("Feminino")),
+        ("M", _("Masculino")),
+        ("O", _("Outro")),
+    ]
     genero = models.CharField(max_length=1, choices=generos, default=generos[0][0])
-    telefone = models.CharField(_("Telefone"), max_length=20, **blank)
-    email = models.EmailField(_("Email"), **blank)
+    telefone = models.CharField(_("Telefone"), max_length=20, **blank_opts)
+    email = models.EmailField(_("Email"), **blank_opts)
     igreja = models.ForeignKey("gestao.Igreja", on_delete=models.SET_NULL, null=True)
 
     class Meta:
