@@ -5,12 +5,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, QuerySet
+from django.db.models.functions import TruncMonth
 from django.http import HttpRequest, HttpResponse
 from django.utils.timezone import datetime, now
 from django.utils.translation import gettext_lazy as _
 
-from .models import Dizimista, Igreja, Pagamento
+from .models import Dizimista, Igreja, Pagamento, ResumoMensal
 
 
 admin.site.site_header = "DezPorcento"
@@ -48,10 +49,11 @@ def GESTORES_GROUP():
             get_permission(Dizimista, "add"),
             get_permission(Dizimista, "change"),
             get_permission(Dizimista, "delete"),
+            get_permission(Igreja, "view"),
             get_permission(Pagamento, "view"),
             get_permission(Pagamento, "add"),
             get_permission(Pagamento, "change"),
-            get_permission(Igreja, "view"),
+            get_permission(ResumoMensal, "view"),
         )
     )
     gestores_group.save()
@@ -70,6 +72,7 @@ def AGENTES_GROUP():
             get_permission(Igreja, "view"),
             get_permission(Pagamento, "view"),
             get_permission(Pagamento, "add"),
+            get_permission(ResumoMensal, "view"),
         )
     )
     agentes_group.save()
@@ -340,3 +343,41 @@ class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
             return qs
         igrejas = igrejas_do_usuário(user)
         return qs.filter(igreja__in=igrejas)
+
+
+@admin.register(ResumoMensal)
+class ResumoMensalAdmin(admin.ModelAdmin):
+    change_list_template = "admin/resumo_pagamentos_change_list.html"
+    list_filter = (IgrejaListFilter, DataMonthListFilter)
+
+    def get_queryset(self, request: HttpRequest):
+        qs = super().get_queryset(request)
+        user = request.user
+        if user.is_superuser:
+            return qs
+        igrejas = igrejas_do_usuário(user)
+        return qs.filter(igreja__in=igrejas)
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+        try:
+            qs = response.context_data["cl"].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            "pagamentos": Count("id"),
+            "total_recebido": Sum("valor"),
+        }
+        data = list(
+            qs.annotate(mês=TruncMonth("data"))
+            .order_by("-mês")
+            .values("mês", "igreja__nome")
+            .annotate(**metrics)
+        )
+        # print(data)
+        response.context_data["resumo"] = data
+        return response

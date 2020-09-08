@@ -10,5 +10,13 @@
         "noqa",
         "pylint",
         "strftime"
-    ]
+    ],
+    "[django-html]": {
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": true,
+            "strings": true
+        }
+        "editor.formatOnSave": false
+    }
 }

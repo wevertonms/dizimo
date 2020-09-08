@@ -60,7 +60,7 @@ def adicionar_dizimistas_e_pagamentos(
         add_pagamentos(d, from_last_n_months, to_n_last_month)
 
 
-def adicionar_igrejas(num_igrejas=1, gestores_por_igreja=1, agentes_por_igreja=2):
+def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2):
     for i in range(1, num_igrejas + 1):
         igreja = Igreja.objects.create(
             nome=f"Igreja {i}", endereco=get_endereco()
@@ -91,6 +91,6 @@ def adicionar_igrejas(num_igrejas=1, gestores_por_igreja=1, agentes_por_igreja=2
         igreja.save()
 
 
-def pupulate_full(num_igrejas=2, num_dizimistas=100):
+def populate_full(num_igrejas=3, num_dizimistas=100):
     adicionar_igrejas(num_igrejas)
     adicionar_dizimistas_e_pagamentos(num_dizimistas)

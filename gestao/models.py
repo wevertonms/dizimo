@@ -93,9 +93,13 @@ class Pagamento(models.Model):
             args=(self.pk,),
         )
 
+    @property
+    def mês(self):
+        return self.data.strftime("%m/%Y")
 
-class RelatorioPagamentos(Pagamento):
+
+class ResumoMensal(Pagamento):
     class Meta:
         proxy = True
-        verbose_name = "Relatório de Pagamentos"
-        verbose_name_plural = "Relatórios de Pagamentos"
+        verbose_name = "Resumo Mensal"
+        verbose_name_plural = "Resumos Mensais"
