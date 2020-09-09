@@ -42,7 +42,9 @@ class Dizimista(models.Model):
         ("M", _("Masculino")),
         ("O", _("Outro")),
     ]
-    genero = models.CharField(max_length=1, choices=generos, default=generos[0][0])
+    genero = models.CharField(
+        _("Gênero"), max_length=1, choices=generos, default=generos[0][0]
+    )
     telefone = models.CharField(_("Telefone"), max_length=20, **blank_opts)
     email = models.EmailField(_("Email"), **blank_opts)
     igreja = models.ForeignKey("gestao.Igreja", on_delete=models.SET_NULL, null=True)

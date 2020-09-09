@@ -15,6 +15,7 @@ psycopg2 = "^2.8.5"
 dj-static = "^0.0.6"
 static3 = "^0.7.0"
 django-environ = "^0.4.5"
+pdfkit = "^0.6.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

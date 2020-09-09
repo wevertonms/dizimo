@@ -1,18 +1,17 @@
-import csv
-
+import pdfkit
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
-from django.db.models import Q, Count, Sum
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncMonth
-from django.http import HttpRequest, HttpResponse
-from django.utils.timezone import datetime, now, timedelta, make_aware
+from django.http import FileResponse, HttpRequest
+from django.template.loader import render_to_string
+from django.utils.timezone import datetime, now, timedelta
 from django.utils.translation import gettext_lazy as _
 
 from .models import Dizimista, Igreja, Pagamento, ResumoMensal
-
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
@@ -138,20 +137,32 @@ class CustomUserAdmin(UserAdmin):
             obj.user_permissions.set(new_user_permissions)
 
 
-class ExportCsvMixin:
-    def export_as_csv(self, request: HttpRequest, queryset):
+class ExportPdfMixin:
+    def export_as_pdf(self, request: HttpRequest, queryset):
         meta = self.model._meta
         field_names = [field.name for field in meta.fields]
-        response = HttpResponse(content_type="text/csv")
-        filename = f'{str(meta).replace(".", "_")}s_{now().strftime("%Y_%m_%d")}'
-        response["Content-Disposition"] = f"attachment; filename={filename}.csv"
-        writer = csv.writer(response)
-        writer.writerow([field.verbose_name for field in meta.fields])
-        for obj in queryset:
-            _ = writer.writerow([getattr(obj, field) for field in field_names])
-        return response
+        headers = [field.verbose_name for field in meta.fields]
+        title = str(meta).split(".")[1] + "s"
+        filename = f'{title}_{now().strftime("%Y_%m_%d")}.pdf'
+        data = [
+            {field: getattr(obj, field) for field in field_names} for obj in queryset
+        ]
+        html = render_to_string(
+            "admin/export_as_pdf.html",
+            dict(title=title.title(), headers=headers, data=data),
+        )
+        options = {
+            "page-size": "A4",
+            "margin-top": "2cm",
+            "margin-right": "1cm",
+            "margin-bottom": "1cm",
+            "margin-left": "2cm",
+            "encoding": "UTF-8",
+        }
+        pdfkit.from_string(html, filename, options=options)
+        return FileResponse(open(filename, "rb"), as_attachment=False)
 
-    export_as_csv.short_description = "Exportar dados em CSV"
+    export_as_pdf.short_description = "Exportar dados em PDF"
 
 
 class DataMonthListFilter(admin.SimpleListFilter):
@@ -228,7 +239,7 @@ class UltimoPagamentoListFilter(admin.SimpleListFilter):
 
 
 @admin.register(Dizimista)
-class DizimistaAdmin(admin.ModelAdmin, ExportCsvMixin):
+class DizimistaAdmin(admin.ModelAdmin, ExportPdfMixin):
     list_per_page = 20
     list_display = (
         "nome",
@@ -244,7 +255,7 @@ class DizimistaAdmin(admin.ModelAdmin, ExportCsvMixin):
         AniversarioMesListFilter,
         UltimoPagamentoListFilter,
     ]
-    actions = ["export_as_csv"]
+    actions = ["export_as_pdf"]
     autocomplete_fields = ["igreja"]
     inlines = (PagamentoInline,)
 
@@ -259,7 +270,7 @@ class DizimistaInline(admin.TabularInline):
 
 
 @admin.register(Igreja)
-class IgrejaAdmin(admin.ModelAdmin, ExportCsvMixin):
+class IgrejaAdmin(admin.ModelAdmin, ExportPdfMixin):
     list_display = (
         "nome",
         "endereco",
@@ -268,7 +279,7 @@ class IgrejaAdmin(admin.ModelAdmin, ExportCsvMixin):
         "número_de_dizimistas",
     )
     search_fields = ["nome"]
-    actions = ["export_as_csv"]
+    actions = ["export_as_pdf"]
     filter_horizontal = ("gestores", "agentes")
     inlines = [DizimistaInline]
 
@@ -309,7 +320,7 @@ class RegistradoPorListFilter(admin.SimpleListFilter):
 
 
 @admin.register(Pagamento)
-class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
+class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
     fields = ("igreja", "dizimista", "valor", "data", "registrado_por")
     list_per_page = 20
     list_display = ["data", "valor", "dizimista_link"]
@@ -322,7 +333,7 @@ class PagamentoAdmin(admin.ModelAdmin, ExportCsvMixin):
         DataMonthListFilter,
         RegistradoPorListFilter,
     ]
-    actions = ["export_as_csv"]
+    actions = ["export_as_pdf"]
 
     def get_readonly_fields(self, request: HttpRequest, obj=None):
         if request.user.is_superuser:
