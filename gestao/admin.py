@@ -406,6 +406,17 @@ class ResumoMensalAdmin(admin.ModelAdmin):
             .values("mês", "igreja__nome")
             .annotate(**metrics)
         )
+        rdata = sorted(data, key=lambda x: x["mês"])
+        igrejas = set(_["igreja__nome"] for _ in rdata)
+        response.context_data["plot_data"] = [
+            dict(
+                x=[_["mês"].strftime("%m/%Y") for _ in rdata if _["igreja__nome"] == i],
+                y=[float(_["total_recebido"]) for _ in rdata if _["igreja__nome"] == i],
+                type="bar",
+                name=i,
+            )
+            for i in igrejas
+        ]
         for d in data:
             d["mês"] = d["mês"].strftime("%m / %Y")
         response.context_data["data"] = data

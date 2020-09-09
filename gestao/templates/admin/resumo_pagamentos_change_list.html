@@ -4,6 +4,30 @@
 
 {% block result_list %}
 
+  <div class="card card-primary" style="width:100%;height:400px;">
+    <div style="width:98%;height:98%;" id="chart"></div>
+  </div>
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script>
+    div = document.getElementById('chart');
+    traces = {{ plot_data|safe }}
+    layout = {
+      font:{
+        family: 'Source Sans Pro, sans-serif',
+        size: 14
+      },
+      xaxis: {
+        title: "Mês"
+      },
+      yaxis: {
+        title: "Total Recebido (R$)"
+      },
+      margin: { t: 40 }
+    }
+    Plotly.newPlot(div, traces,layout, {responsive: true});
+  </script>
+
   {% include "admin/table.html" %}
 
 {% endblock %}
