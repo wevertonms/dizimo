@@ -420,6 +420,9 @@ class ResumoMensalAdmin(admin.ModelAdmin):
             )
             for i in igrejas
         ]
+        response.context_data["xaxis_title"] = "Mês"
+        response.context_data["yaxis_title"] = "Total Recebido (R$)"
+        response.context_data["plot_id"] = "chart"
         for d in data:
             d["mês"] = d["mês"].strftime("%m / %Y")
         response.context_data["data"] = data
