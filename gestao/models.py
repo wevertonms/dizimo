@@ -104,8 +104,8 @@ class Pagamento(models.Model):
         return self.data.strftime("%m/%Y")
 
 
-class ResumoMensal(Pagamento):
+class ResumoPagamentos(Pagamento):
     class Meta:
         proxy = True
-        verbose_name = "Resumo Mensal"
-        verbose_name_plural = "Resumos Mensais"
+        verbose_name = "Resumo de pagamentos"
+        verbose_name_plural = "Resumos de pagamentos"

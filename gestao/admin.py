@@ -5,13 +5,13 @@ from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.db.models import Count, Q, Sum
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncDay, TruncWeek, TruncYear
 from django.http import FileResponse, HttpRequest
 from django.template.loader import render_to_string
 from django.utils.timezone import datetime, now, timedelta
 from django.utils.translation import gettext_lazy as _
 
-from .models import Dizimista, Igreja, Pagamento, ResumoMensal
+from .models import Dizimista, Igreja, Pagamento, ResumoPagamentos
 from dizimo.settings import EMAIL_HOST_USER
 
 admin.site.site_header = "DezPorcento"
@@ -58,10 +58,11 @@ def GESTORES_GROUP():
             get_permission(Dizimista, "change"),
             get_permission(Dizimista, "delete"),
             get_permission(Igreja, "view"),
+            get_permission(Igreja, "change"),
             get_permission(Pagamento, "view"),
             get_permission(Pagamento, "add"),
             get_permission(Pagamento, "change"),
-            get_permission(ResumoMensal, "view"),
+            get_permission(ResumoPagamentos, "view"),
         )
     )
     gestores_group.save()
@@ -80,7 +81,7 @@ def AGENTES_GROUP():
             get_permission(Igreja, "view"),
             get_permission(Pagamento, "view"),
             get_permission(Pagamento, "add"),
-            get_permission(ResumoMensal, "view"),
+            get_permission(ResumoPagamentos, "view"),
         )
     )
     agentes_group.save()
@@ -379,10 +380,42 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
         return qs.filter(igreja__in=igrejas)
 
 
-@admin.register(ResumoMensal)
-class ResumoMensalAdmin(admin.ModelAdmin):
+class GroupByDateListFilter(admin.SimpleListFilter):
+    title = _("Agrupar por")
+    parameter_name = "group_date_by"
+    groups_settings = {
+        "dia": dict(field="day", func=TruncDay, date_format="%Y-%m-%d"),
+        "semana": dict(field="week", func=TruncWeek, date_format="%Y-%m-%d"),
+        "mês": dict(field="month", func=TruncMonth, date_format="%Y-%m"),
+        "ano": dict(field="year", func=TruncYear, date_format="%Y"),
+    }
+    selected_group = "dia"
+
+    def lookups(self, request: HttpRequest, model_admin):  # noqa
+        return [(_.lower(), _) for _ in ["Dia", "Semana", "Mês", "Ano"]]
+
+    def queryset(self, request: HttpRequest, queryset):
+        GroupByDateListFilter.selected_group = self.value() or "dia"
+        return queryset
+
+    def group_date_by_periord(self, queryset, period):
+        gs = self.groups_settings[self.selected_group]
+        truncate_function = gs["func"]
+        queryset = (
+            queryset.annotate(**{period: truncate_function("data")})
+            .order_by(f"-{period}")
+            .values(period, "igreja__nome")
+        ).annotate(pagamentos=Count("id"), total_recebido=Sum("valor"))
+        date_format = self.groups_settings[self.selected_group]["date_format"]
+        for row in queryset:
+            row[period] = row[period].strftime(date_format)
+        return queryset
+
+
+@admin.register(ResumoPagamentos)
+class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
     change_list_template = "admin/resumo_pagamentos_change_list.html"
-    list_filter = (IgrejaListFilter, DataMonthListFilter)
+    list_filter = (GroupByDateListFilter, IgrejaListFilter, DataMonthListFilter)
 
     def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
@@ -398,33 +431,39 @@ class ResumoMensalAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
         try:
-            qs = response.context_data["cl"].queryset
+            queryset = response.context_data["cl"].queryset
         except (AttributeError, KeyError):
             return response
-
-        metrics = {"pagamentos": Count("id"), "total_recebido": Sum("valor")}
-        data = (
-            qs.annotate(mês=TruncMonth("data"))
-            .order_by("-mês")
-            .values("mês", "igreja__nome")
-            .annotate(**metrics)
-        )
-        rdata = sorted(data, key=lambda x: x["mês"])
-        igrejas = set(_["igreja__nome"] for _ in rdata)
-        response.context_data["plot_data"] = [
-            dict(
-                x=[_["mês"].strftime("%m/%Y") for _ in rdata if _["igreja__nome"] == i],
-                y=[float(_["total_recebido"]) for _ in rdata if _["igreja__nome"] == i],
-                type="bar",
-                name=i,
+        if queryset:
+            period = self.selected_group
+            date_format = self.groups_settings[period]["date_format"]
+            queryset = self.group_date_by_periord(queryset, period)
+            reversed_qs = sorted(queryset, key=lambda x: x[period])
+            igrejas = set(_["igreja__nome"] for _ in queryset)
+            plot_data = [
+                dict(
+                    x=[_[period] for _ in reversed_qs if _["igreja__nome"] == i],
+                    y=[
+                        float(_["total_recebido"])
+                        for _ in reversed_qs
+                        if _["igreja__nome"] == i
+                    ],
+                    type="bar",
+                    name=i,
+                )
+                for i in igrejas
+            ]
+            response.context_data["plot_data"] = plot_data
+            response.context_data["xaxis"] = dict(
+                title=period.title(), tickformat=date_format
             )
-            for i in igrejas
-        ]
-        response.context_data["xaxis_title"] = "Mês"
-        response.context_data["yaxis_title"] = "Total Recebido (R$)"
-        response.context_data["plot_id"] = "chart"
-        for d in data:
-            d["mês"] = d["mês"].strftime("%m / %Y")
-        response.context_data["data"] = data
-        response.context_data["headers"] = ["Igreja", "Mês", "Pagamentos", "Total (R$)"]
+            response.context_data["yaxis"] = dict(title="Total Recebido (R$)")
+            response.context_data["plot_id"] = "chart"
+            response.context_data["data"] = queryset
+            response.context_data["headers"] = [
+                "Igreja",
+                self.selected_group.title(),
+                "Pagamentos",
+                "Total (R$)",
+            ]
         return response

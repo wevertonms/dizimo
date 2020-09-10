@@ -11,12 +11,8 @@ layout = {
     family: "Source Sans Pro, sans-serif",
     size: 14
   },
-  xaxis: {
-    title: "{{ xaxis_title|safe }}"
-  },
-  yaxis: {
-    title: "{{ yaxis_title|safe }}"
-  },
+  xaxis: {{ xaxis|safe }},
+  yaxis: {{ yaxis|safe }},
   margin: { t: 40 }
 }
 options = {
