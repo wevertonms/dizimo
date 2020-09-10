@@ -91,7 +91,7 @@ class Pagamento(models.Model):
         ordering = ["-data"]
 
     def __str__(self):
-        return str(self.id)  # f"R$ {self.valor} em {self.data}"
+        return str(self.id)
 
     def get_absolute_url(self):
         reverse(

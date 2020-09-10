@@ -163,7 +163,7 @@ DATE_INPUT_FORMATS = (
 
 DATE_FORMAT = "d/m/y"
 TIME_FORMAT = "H:i"
-DATETIME_FORMAT = "d/m/y à\s H:i"  # noqa
+DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
 DECIMAL_SEPARATOR = ","
 
 # Static files (CSS, JavaScript, Images)
