@@ -57,6 +57,28 @@ INSTALLED_APPS = [
 JAZZMIN_SETTINGS = {
     "site_title": "DezPorcento",  # title of the window
     "site_header": "DezPorcento",  # Title on the brand, and the login screen (19 chars max)
+    # square logo to use for your site, must be present in static files, used for favicon and brand on top left
+    "site_logo": "images/logo.png",
+    # Welcome text on the login screen
+    "welcome_sign": "Bem-vindo ao DezPorcento!",
+    # Copyright on the footer
+    "copyright": "DezPorcento Ltd",
+    "hide_models": ["auth.user"],
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-danger",
+    "accent": "accent-danger",
+    "navbar": "navbar-danger navbar-dark",
+    "no_navbar_border": False,
+    "sidebar": "sidebar-light-danger",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
 }
 
 MIDDLEWARE = [
