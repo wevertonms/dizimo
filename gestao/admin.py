@@ -12,6 +12,7 @@ from django.utils.timezone import datetime, now, timedelta
 from django.utils.translation import gettext_lazy as _
 
 from .models import Dizimista, Igreja, Pagamento, ResumoMensal
+from dizimo.settings import EMAIL_HOST_USER
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
@@ -344,23 +345,25 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
         obj.registrado_por = request.user
         super().save_model(request, obj, form, change)
         try:
-            destinatários = [request.user.mail]
+            destinatários = []
+            if obj.dizimista.email:
+                destinatários.append(obj.dizimista.email)
             send_mail(
-                subject="Pagamento adicionado",
-                message=f"""
-        Dizimista: {obj.dizimista}
-        Igreja: {obj.igreja}
-        Data: {obj.data}
-        Valor: {obj.valor}
-        Registrado_por: {obj.registrado_por}
-        Código do pagamento: {obj.id}
-        """,
-                from_email="naoresponda@dezporcento.com",
+                subject="Registro de pagamento",
+                message="",
+                html_message=render_to_string("pagamento.html/", dict(obj=obj)),
+                from_email=EMAIL_HOST_USER,
                 recipient_list=destinatários,
-                fail_silently=True,
+                fail_silently=False,
+            )
+            self.message_user(
+                request,
+                f"E-mails enviados com sucesso.",
+                level="success",
             )
         except Exception as e:
             print(e)
+            self.message_user(request, "Erro ao enviars e-mail", level="error")
 
     def dizimista_link(self, obj):
         return obj.dizimista.link()
