@@ -19,7 +19,7 @@ class Perfil(models.Model):
     endereco = models.CharField(_("Endereço"), max_length=255, **blank_opts)
     nascimento = models.DateField(_("Data de nascimento"), **blank_opts)
     genero = models.CharField(
-        _("Gênero"), max_length=1, choices=GENEROS, default=FEMININO
+        _("Gênero"), max_length=1, choices=GENEROS, default=FEMININO[0]
     )
     telefone = models.CharField(_("Telefone"), max_length=20, **blank_opts)
     email = models.EmailField(_("Email"), **blank_opts)

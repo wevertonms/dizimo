@@ -76,7 +76,10 @@ def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2
                 password=f"agente{i*agentes_por_igreja + j}",
                 is_staff=True,
             )  # type: User
-            Perfil.objects.create(nome=FAKER.first_name(), user=agente)
+            profile = FAKER.simple_profile()
+            Perfil.objects.create(
+                nome=profile["name"], user=agente, genero=profile["sex"]
+            )
             agente.groups.add(AGENTES_GROUP())
             agente.save()
             igreja.agentes.add(agente)
@@ -87,7 +90,10 @@ def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2
                 password=f"gestor{i*gestores_por_igreja + j}",
                 is_staff=True,
             )  # type: User
-            Perfil.objects.create(nome=FAKER.first_name(), user=gestor)
+            profile = FAKER.simple_profile()
+            Perfil.objects.create(
+                nome=profile["name"], user=gestor, genero=profile["sex"]
+            )
             gestor.groups.add(GESTORES_GROUP())
             gestor.save()
             igreja.gestores.add(gestor)
