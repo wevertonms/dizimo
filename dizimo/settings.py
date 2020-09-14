@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "core",
     "gestao",
 ]
 
@@ -59,27 +60,12 @@ JAZZMIN_SETTINGS = {
     "site_header": "DezPorcento",  # Title on the brand, and the login screen (19 chars max)
     # square logo to use for your site, must be present in static files, used for favicon and brand on top left
     "site_logo": "images/logo.png",
-    # Welcome text on the login screen
-    "welcome_sign": "Bem-vindo ao DezPorcento!",
-    # Copyright on the footer
-    "copyright": "DezPorcento Ltd",
-    "hide_models": ["auth.user"],
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-danger",
-    "accent": "accent-danger",
-    "navbar": "navbar-danger navbar-dark",
-    "no_navbar_border": False,
-    "sidebar": "sidebar-light-danger",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
+    "welcome_sign": "Bem-vindo ao DezPorcento!",  # Welcome text on the login screen
+    "copyright": "DezPorcento Ltd",  # Copyright on the footer
+    # "hide_models": ["auth.user", "admin.PerfilAdmin"],
 }
+
+LOGOUT_REDIRECT_URL = "/"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -152,7 +138,7 @@ TIME_ZONE = "America/Maceio"
 
 USE_I18N = True
 
-USE_L10N = False
+USE_L10N = True
 
 USE_TZ = True
 
@@ -162,16 +148,18 @@ DATE_INPUT_FORMATS = (
 )
 
 DATE_FORMAT = "d/m/y"
-TIME_FORMAT = "H:i"
+TIME_FORMAT = "H:i\h"  # noqa
 DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
 DECIMAL_SEPARATOR = ","
+USE_THOUSAND_SEPARATOR = True
+THOUSAND_SEPARATOR = "."
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# STATICFILES_DIRS = (BASE_DIR / STATIC_URL,)
+STATICFILES_DIRS = [BASE_DIR / STATIC_URL]
 
 
 # Email

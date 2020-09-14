@@ -5,18 +5,21 @@
     "python.testing.nosetestsEnabled": false,
     "cSpell.words": [
         "Genero",
+        "INADIMPLENCIA",
         "Unregister",
         "gestao",
         "noqa",
         "pylint",
-        "strftime"
+        "strftime",
+        "xaxis",
+        "yaxis"
     ],
     "[django-html]": {
         "editor.quickSuggestions": {
             "other": true,
             "comments": true,
             "strings": true
-        }
+        },
         "editor.formatOnSave": false
     }
 }

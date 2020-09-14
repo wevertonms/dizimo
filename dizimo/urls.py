@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from gestao.views import home
 
 urlpatterns = [
     path("", admin.site.urls),
+    path("home/", home),
 ]

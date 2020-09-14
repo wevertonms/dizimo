@@ -1,8 +1,6 @@
 import pdfkit
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group, Permission, User
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncMonth, TruncDay, TruncWeek, TruncYear
@@ -11,40 +9,14 @@ from django.template.loader import render_to_string
 from django.utils.timezone import datetime, now, timedelta
 from django.utils.translation import gettext_lazy as _
 
-from .models import Dizimista, Igreja, Pagamento, ResumoPagamentos
+from .models import Dizimista, Igreja, Pagamento, ResumoPagamentos, PerfilDizimista
+from core.models import Perfil
+from core.admin import get_permission
 from dizimo.settings import EMAIL_HOST_USER
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
 admin.site.index_title = "Registros"
-
-
-def igrejas_do_usuário(user):
-    gestor_em = Q(gestores__pk=user.pk)
-    agente_em = Q(agentes__pk=user.pk)
-    return Igreja.objects.filter(agente_em | gestor_em)
-
-
-def dizimistas_do_usuário(user):
-    qs = Dizimista.objects.all()  # super().get_queryset(request)
-    if user.is_superuser:
-        return qs
-    igrejas = igrejas_do_usuário(user)
-    return qs.filter(igreja__in=igrejas)
-
-
-def get_permission(model, permission: str):
-    model_content_type = ContentType.objects.get_for_model(model)
-    model_permissions = Permission.objects.filter(content_type=model_content_type)
-    return model_permissions.get(codename__startswith=permission)
-
-
-def user_str(user: User):
-    return f"{user.first_name} {user.last_name} ({user.username})"
-
-
-# Unregister the provided model admin
-admin.site.unregister(User)
 
 
 def GESTORES_GROUP():
@@ -53,10 +25,16 @@ def GESTORES_GROUP():
         (
             get_permission(User, "view"),
             get_permission(User, "change"),
+            get_permission(Perfil, "view"),
+            get_permission(Perfil, "add"),
+            get_permission(Perfil, "change"),
             get_permission(Dizimista, "view"),
             get_permission(Dizimista, "add"),
             get_permission(Dizimista, "change"),
             get_permission(Dizimista, "delete"),
+            get_permission(PerfilDizimista, "view"),
+            get_permission(PerfilDizimista, "add"),
+            get_permission(PerfilDizimista, "change"),
             get_permission(Igreja, "view"),
             get_permission(Igreja, "change"),
             get_permission(Pagamento, "view"),
@@ -75,9 +53,15 @@ def AGENTES_GROUP():
         (
             get_permission(User, "view"),
             get_permission(User, "change"),
+            get_permission(Perfil, "view"),
+            get_permission(Perfil, "add"),
+            get_permission(Perfil, "change"),
             get_permission(Dizimista, "view"),
             get_permission(Dizimista, "add"),
             get_permission(Dizimista, "change"),
+            get_permission(PerfilDizimista, "view"),
+            get_permission(PerfilDizimista, "add"),
+            get_permission(PerfilDizimista, "change"),
             get_permission(Igreja, "view"),
             get_permission(Pagamento, "view"),
             get_permission(Pagamento, "add"),
@@ -88,55 +72,55 @@ def AGENTES_GROUP():
     return agentes_group
 
 
-@admin.register(User)
-class CustomUserAdmin(UserAdmin):
-    readonly_fields = ["date_joined"]
-    list_filter = []
+@admin.register(Perfil)
+class PerfilAdmin(admin.ModelAdmin):
+    list_display = ["nome", "user"]
+    sortable_by = list_display
+    search_fields = ["nome", "user"]
+
+    def get_readonly_fields(self, request: HttpRequest, obj: PerfilDizimista):  # noqa
+        fields = ["user"]
+        user = request.user
+        is_superuser = user.is_superuser
+        if not is_superuser:
+            if hasattr(obj, "user"):
+                if obj.user != user:
+                    fields += [
+                        "nome",
+                        "endereco",
+                        "nascimento",
+                        "genero",
+                        "telefone",
+                        "email",
+                        "dizimista",
+                    ]
+            return fields
+        return tuple()
 
     def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
         user = request.user
         if user.is_superuser:
             return qs
-        sou_eu = Q(username=user.username)
-        # igrejas = igrejas_do_usuário(user)
-        # agentes = Q(agente_em__in=igrejas)
-        # gestores = Q(gestor_em__in=igrejas)
-        return qs.filter(sou_eu)
+        return qs.filter(user=user)
 
-    def get_form(self, request: HttpRequest, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        is_superuser = request.user.is_superuser
-        disabled_fields = set(["last_login"])
-        if not is_superuser:
-            if request.user == obj:
-                disabled_fields |= {
-                    "username",
-                    "is_active",
-                    "is_superuser",
-                    "is_staff",
-                    "groups",
-                    "user_permissions",
-                }
-            else:
-                disabled_fields = set(form.base_fields)
-        for field in disabled_fields:
-            if field in form.base_fields:
-                form.base_fields[field].disabled = True
-        return form
 
-    def save_model(self, request: HttpRequest, obj: User, form, change):
-        obj.registrado_por = request.user
-        is_new_user = not obj.pk
-        if is_new_user:
-            obj.is_staff = True
-        super().save_model(request, obj, form, change)
-        if is_new_user:
-            new_user_permissions = [
-                get_permission(User, "view"),
-                get_permission(User, "change"),
-            ]
-            obj.user_permissions.set(new_user_permissions)
+def user_str(user: User):
+    return f"{user.first_name} {user.last_name} ({user.username})"
+
+
+def igrejas_do_usuário(user):
+    gestor_em = Q(gestores__pk=user.pk)
+    agente_em = Q(agentes__pk=user.pk)
+    return Igreja.objects.filter(agente_em | gestor_em)
+
+
+def dizimistas_do_usuário(user):
+    qs = Dizimista.objects.all()  # super().get_queryset(request)
+    if user.is_superuser:
+        return qs
+    igrejas = igrejas_do_usuário(user)
+    return qs.filter(igreja__in=igrejas)
 
 
 class ExportPdfMixin:
@@ -195,22 +179,74 @@ class DataMonthListFilter(admin.SimpleListFilter):
 class AniversarioMesListFilter(DataMonthListFilter):
     title = _("Anversariante do mês")
     parameter_name = "aniversario_mes"
-    field = "nascimento__month"
+    field = "perfil__nascimento__month"
 
 
 def endereco(obj):
     return f"{obj.endereco[:30]} ..."
 
 
+class PerfilDizimistaInline(admin.StackedInline):
+    model = PerfilDizimista
+    can_delete = False
+    view_on_site = False
+    verbose_name_plural = "Perfil"
+    autocomplete_fields = ["user"]
+    extra = 1
+
+    def get_readonly_fields(self, request: HttpRequest, obj: PerfilDizimista):  # noqa
+        fields = []
+        user = request.user
+        is_superuser = user.is_superuser
+        if not is_superuser:
+            if hasattr(obj, "perfil"):
+                if hasattr(obj.perfil, "user"):
+                    if obj.perfil.user:
+                        fields += [
+                            "nome",
+                            "endereco",
+                            "nascimento",
+                            "genero",
+                            "telefone",
+                            "email",
+                            "user",
+                        ]
+            return fields
+        return tuple()
+
+
 class PagamentoInline(admin.TabularInline):
     model = Pagamento
     view_on_site = False
-    extra = 0
+    extra = 1
+    fields = ("data", "valor", "registrado_por")
+    readonly_fields = ("data", "registrado_por")
+
+    def save_model(self, request: HttpRequest, obj, form, change):
+        obj.registrado_por = request.user
+        super().save_model(request, obj, form, change)
+        try:
+            destinatários = []
+            if obj.dizimista.email:
+                destinatários.append(obj.dizimista.email)
+            send_mail(
+                subject="Registro de pagamento",
+                message="",
+                html_message=render_to_string("pagamento.html/", dict(obj=obj)),
+                from_email=EMAIL_HOST_USER,
+                recipient_list=destinatários,
+                fail_silently=False,
+            )
+            self.message_user(request, "E-mails enviados com sucesso.", level="success")
+        except Exception as e:
+            print(e)
+            self.message_user(request, "Erro ao enviar e-mail", level="error")
 
 
 class IgrejaListFilter(admin.SimpleListFilter):
     title = _("Igreja")
     parameter_name = "igreja"
+    field = "igreja__pk"
 
     def lookups(self, request: HttpRequest, model_admin):  # noqa
         user = request.user
@@ -222,7 +258,7 @@ class IgrejaListFilter(admin.SimpleListFilter):
 
     def queryset(self, request: HttpRequest, queryset):
         if self.value():
-            return queryset.filter(igreja__pk=self.value())
+            return queryset.filter(**{self.field: self.value()})
         return queryset
 
 
@@ -242,24 +278,24 @@ class UltimoPagamentoListFilter(admin.SimpleListFilter):
 
 @admin.register(Dizimista)
 class DizimistaAdmin(admin.ModelAdmin, ExportPdfMixin):
+    actions_selection_counter = False
     list_per_page = 20
-    list_display = (
-        "nome",
-        "nascimento",
-        endereco,
-        "telefone",
-    )
-    ordering = ["nome"]
-    search_fields = ["nome"]
+    list_select_related = True
+    list_display = ["perfil", "nascimento", "igreja"]
+    sortable_by = list_display
+    search_fields = ["perfil__nome"]
     list_filter = [
         IgrejaListFilter,
-        "genero",
+        "perfil__genero",
         AniversarioMesListFilter,
         UltimoPagamentoListFilter,
     ]
     actions = ["export_as_pdf"]
     autocomplete_fields = ["igreja"]
-    inlines = (PagamentoInline,)
+    inlines = [
+        PerfilDizimistaInline,
+        PagamentoInline,
+    ]
 
     def get_queryset(self, request: HttpRequest):
         return dizimistas_do_usuário(user=request.user)
@@ -267,8 +303,8 @@ class DizimistaAdmin(admin.ModelAdmin, ExportPdfMixin):
 
 class DizimistaInline(admin.TabularInline):
     model = Dizimista
-    exclude = ("nome",)
-    view_on_site = False
+    view_on_site = True
+    fields = []
 
 
 @admin.register(Igreja)
@@ -276,10 +312,11 @@ class IgrejaAdmin(admin.ModelAdmin, ExportPdfMixin):
     list_display = (
         "nome",
         "endereco",
-        "gestores_da_patoral",
         "agentes_da_pastoral",
+        "gestores_da_patoral",
         "número_de_dizimistas",
     )
+    sortable_by = list_display
     search_fields = ["nome"]
     actions = ["export_as_pdf"]
     filter_horizontal = ("gestores", "agentes")
@@ -295,13 +332,13 @@ class IgrejaAdmin(admin.ModelAdmin, ExportPdfMixin):
     def gestores_da_patoral(self, obj: Igreja):
         display_text = []
         for user in obj.gestores.all():
-            display_text.append(user_str(user))
+            display_text.append(str(user.perfil or user))
         return ", ".join(display_text)
 
     def agentes_da_pastoral(self, obj: Igreja):
         display_text = []
         for user in obj.agentes.all():
-            display_text.append(user_str(user))
+            display_text.append(str(user.perfil or user))
         return ", ".join(display_text)
 
 
@@ -313,7 +350,7 @@ class RegistradoPorListFilter(admin.SimpleListFilter):
         registradores = set(
             p.registrado_por for p in model_admin.get_queryset(request).all()
         )
-        return [(r.pk, user_str(r)) for r in registradores]
+        return [(r.id, r.perfil) for r in registradores if r]
 
     def queryset(self, request: HttpRequest, queryset):
         if self.value():
@@ -321,16 +358,21 @@ class RegistradoPorListFilter(admin.SimpleListFilter):
         return queryset
 
 
+class PagamentoIgrejaFilter(IgrejaListFilter):
+    field = "dizimista__igreja__pk"
+
+
 @admin.register(Pagamento)
 class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
-    fields = ("igreja", "dizimista", "valor", "data", "registrado_por")
+    fields = ("dizimista", "valor", "data", "registrado_por", "id")
     list_per_page = 20
     list_display = ["data", "valor", "dizimista_link"]
+    sortable_by = list_display
     list_select_related = True
-    autocomplete_fields = ["igreja", "dizimista"]
-    search_fields = ["igreja__nome", "dizimista__nome"]
+    autocomplete_fields = ["dizimista"]
+    search_fields = ["dizimista__perfil__nome"]
     list_filter = [
-        IgrejaListFilter,
+        PagamentoIgrejaFilter,
         "data",
         DataMonthListFilter,
         RegistradoPorListFilter,
@@ -338,8 +380,8 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
     actions = ["export_as_pdf"]
 
     def get_readonly_fields(self, request: HttpRequest, obj=None):
-        if request.user.is_superuser:
-            return []
+        # if request.user.is_superuser:
+        #     return []
         return ["data", "registrado_por", "id"]
 
     def save_model(self, request: HttpRequest, obj, form, change):
@@ -357,17 +399,17 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
                 recipient_list=destinatários,
                 fail_silently=False,
             )
-            self.message_user(
-                request,
-                f"E-mails enviados com sucesso.",
-                level="success",
-            )
+            self.message_user(request, "E-mails enviados com sucesso.", level="success")
         except Exception as e:
             print(e)
-            self.message_user(request, "Erro ao enviars e-mail", level="error")
+            self.message_user(request, "Erro ao enviar e-mail", level="warning")
 
     def dizimista_link(self, obj):
-        return obj.dizimista.link()
+        try:
+            return obj.dizimista.link()
+        except Exception as exc:
+            print(exc)
+            return ""
 
     dizimista_link.short_description = "Dizimista"
 
@@ -377,7 +419,7 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
         if user.is_superuser:
             return qs
         igrejas = igrejas_do_usuário(user)
-        return qs.filter(igreja__in=igrejas)
+        return qs.filter(dizimista__igreja__in=igrejas)
 
 
 class GroupByDateListFilter(admin.SimpleListFilter):
@@ -389,13 +431,13 @@ class GroupByDateListFilter(admin.SimpleListFilter):
         "mês": dict(field="month", func=TruncMonth, date_format="%Y-%m"),
         "ano": dict(field="year", func=TruncYear, date_format="%Y"),
     }
-    selected_group = "dia"
+    selected_group = "mês"
 
     def lookups(self, request: HttpRequest, model_admin):  # noqa
         return [(_.lower(), _) for _ in ["Dia", "Semana", "Mês", "Ano"]]
 
     def queryset(self, request: HttpRequest, queryset):
-        GroupByDateListFilter.selected_group = self.value() or "dia"
+        GroupByDateListFilter.selected_group = self.value() or "mês"
         return queryset
 
     def group_date_by_periord(self, queryset, period):
@@ -404,7 +446,7 @@ class GroupByDateListFilter(admin.SimpleListFilter):
         queryset = (
             queryset.annotate(**{period: truncate_function("data")})
             .order_by(f"-{period}")
-            .values(period, "igreja__nome")
+            .values(period, "dizimista__igreja__nome")
         ).annotate(pagamentos=Count("id"), total_recebido=Sum("valor"))
         date_format = self.groups_settings[self.selected_group]["date_format"]
         for row in queryset:
@@ -415,7 +457,7 @@ class GroupByDateListFilter(admin.SimpleListFilter):
 @admin.register(ResumoPagamentos)
 class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
     change_list_template = "admin/resumo_pagamentos_change_list.html"
-    list_filter = (GroupByDateListFilter, IgrejaListFilter, DataMonthListFilter)
+    list_filter = (PagamentoIgrejaFilter, GroupByDateListFilter, DataMonthListFilter)
 
     def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
@@ -423,7 +465,7 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
         if user.is_superuser:
             return qs
         igrejas = igrejas_do_usuário(user)
-        return qs.filter(igreja__in=igrejas)
+        return qs.filter(dizimista__igreja__in=igrejas)
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -436,17 +478,22 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
             return response
         if queryset:
             period = self.selected_group
+            print(period)
             date_format = self.groups_settings[period]["date_format"]
             queryset = self.group_date_by_periord(queryset, period)
             reversed_qs = sorted(queryset, key=lambda x: x[period])
-            igrejas = set(_["igreja__nome"] for _ in queryset)
+            igrejas = set(_["dizimista__igreja__nome"] for _ in queryset)
             plot_data = [
                 dict(
-                    x=[_[period] for _ in reversed_qs if _["igreja__nome"] == i],
+                    x=[
+                        _[period]
+                        for _ in reversed_qs
+                        if _["dizimista__igreja__nome"] == i
+                    ],
                     y=[
                         float(_["total_recebido"])
                         for _ in reversed_qs
-                        if _["igreja__nome"] == i
+                        if _["dizimista__igreja__nome"] == i
                     ],
                     type="bar",
                     name=i,

@@ -1,12 +1,13 @@
 from faker import Faker
-from random import choice
+from random import choice, random
 
-from gestao.models import Dizimista, Igreja, Pagamento, User
+from core.models import Perfil
+from gestao.models import Dizimista, Igreja, Pagamento, User, PerfilDizimista
 from gestao.admin import GESTORES_GROUP, AGENTES_GROUP
 from django.utils import timezone
 
 FAKER = Faker("pt-BR")
-
+TAXA_DE_INADIMPLENCIA = 0.9
 PAGAMENTOS_VALORES = (20, 30, 40, 50, 70, 100, 200)
 
 
@@ -24,30 +25,33 @@ def get_endereco():
 
 def add_pagamentos(dizimista, from_last_n_months, to_n_last_month):
     for m in range(from_last_n_months, to_n_last_month, -1):
-        igreja = dizimista.igreja  # type: Igreja
-        p = Pagamento(
-            dizimista=dizimista,
-            igreja=igreja,
-            data=timezone.make_aware(FAKER.date_time_between(f"-{m}M", f"-{m-1}M")),
-            valor=choice(PAGAMENTOS_VALORES),
-            registrado_por=choice(igreja.agentes.all()),
-        )
-        p.save()
+        if random() < TAXA_DE_INADIMPLENCIA:
+            igreja = dizimista.igreja  # type: Igreja
+            p = Pagamento(
+                dizimista=dizimista,
+                data=timezone.make_aware(FAKER.date_time_between(f"-{m}M", f"-{m-1}M")),
+                valor=choice(PAGAMENTOS_VALORES),
+                registrado_por=choice(igreja.agentes.all()),
+            )
+            p.save()
 
 
 def get_dizimista(igrejas=None):
     igrejas = igrejas or all_igrejas()
+    igreja = choice(igrejas)
+    dizimo = choice(PAGAMENTOS_VALORES)
+    dizimista = Dizimista.objects.create(igreja=igreja, dizimo=dizimo)
     profile = FAKER.simple_profile()
-    dados = dict(
+    PerfilDizimista.objects.create(
         nome=profile["name"],
         genero=profile["sex"],
         endereco=get_endereco(),
         nascimento=FAKER.date_between("-70y", "-20y"),
         telefone=FAKER.phone_number(),
         email=profile["mail"],
-        igreja=choice(igrejas),
+        dizimista=dizimista,
     )
-    return Dizimista(**dados)
+    return dizimista
 
 
 def adicionar_dizimistas_e_pagamentos(
@@ -71,8 +75,8 @@ def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2
                 username=f"agente{i*agentes_por_igreja + j}",
                 password=f"agente{i*agentes_por_igreja + j}",
                 is_staff=True,
-                first_name=FAKER.first_name(),
             )  # type: User
+            Perfil.objects.create(nome=FAKER.first_name(), user=agente)
             agente.groups.add(AGENTES_GROUP())
             agente.save()
             igreja.agentes.add(agente)
@@ -82,8 +86,8 @@ def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2
                 username=f"gestor{i*gestores_por_igreja + j}",
                 password=f"gestor{i*gestores_por_igreja + j}",
                 is_staff=True,
-                first_name=FAKER.first_name(),
             )  # type: User
+            Perfil.objects.create(nome=FAKER.first_name(), user=gestor)
             gestor.groups.add(GESTORES_GROUP())
             gestor.save()
             igreja.gestores.add(gestor)
