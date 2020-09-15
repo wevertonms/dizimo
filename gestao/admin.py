@@ -189,6 +189,7 @@ class PerfilDizimistaInline(admin.StackedInline):
     verbose_name_plural = "Perfil"
     autocomplete_fields = ["user"]
     extra = 1
+    fields = ["nome", "endereco", "nascimento", "genero", "telefone", "email"]
 
     def get_readonly_fields(self, request: HttpRequest, obj: PerfilDizimista):  # noqa
         fields = []

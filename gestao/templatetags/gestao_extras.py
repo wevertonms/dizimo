@@ -24,7 +24,7 @@ def pagamentos(user):
 @register.simple_tag(takes_context=True)
 def plot(context):
     queryset = pagamentos(context["user"])
-    period = "dia"
+    period = "semana"
     queryset = group_date_by_periord(queryset, period)
     plot_data = format_plot_data(queryset, period)
     context["plot_data"] = plot_data
@@ -46,5 +46,4 @@ def num_dizimistas(context):
 
 @register.simple_tag(takes_context=True)
 def recebido_este_mes(context):
-    print(context["user"])
     return pagamentos(context["user"]).aggregate(total=Sum("valor"))["total"]
