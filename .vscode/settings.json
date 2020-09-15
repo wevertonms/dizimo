@@ -21,5 +21,8 @@
             "strings": true
         },
         "editor.formatOnSave": false
+    },
+    "[html]": {
+        "editor.formatOnSave": false
     }
 }

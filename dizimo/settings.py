@@ -83,7 +83,7 @@ ROOT_URLCONF = "dizimo.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["gestao/templates/"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
