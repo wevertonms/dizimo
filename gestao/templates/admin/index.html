@@ -14,45 +14,45 @@
 
 
 {% block content %}
-    <div class="col-lg-9 col-12">
-        <!-- <h3>Indicadores</h3> -->
+    <div class="module col-lg-9 col-12">
+        <h4>Indicadores</h4>
         <div class="row">
             {% load gestao_extras %}
             <div class="col-lg-4 col-12">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3 style="font-size: 50px;">{% num_dizimistas %}</h3>
-                        <p>Dizimistas</p>
+                        <h3 style="font-size: 3rem;">{% num_dizimistas %}</h3>
+                        <p style="font-size: 1.2rem">Dizimistas</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-bag"></i>
+                        <i class="fas fa-users"></i>
                     </div>
-                    <a href="gestao/dizimista/" class="small-box-footer">Detalhes <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="gestao/dizimista/" class="small-box-footer">Detalhes   <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <div class="col-lg-4 col-12">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3 style="font-size: 50px;">{% num_pagamentos_este_mes %}</h3>
-                        <p>Pagamentos este mês</p>
+                        <h3 style="font-size: 3rem;">{% num_pagamentos_este_mes %}</h3>
+                        <p style="font-size: 1.2rem">Pagamentos este mês</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-bag"></i>
+                        <i class="fa fa-hand-holding-usd"></i>
                     </div>
-                    <a href="gestao/pagamento/" class="small-box-footer">Detalhes <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="gestao/pagamento/" class="small-box-footer">Detalhes   <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
             <div class="col-lg-4 col-12">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3 style="font-size: 50px;">R$ {% recebido_este_mes %}</h3>
-                        <p>Recebido este mês</p>
+                        <h3 style="font-size: 3rem;">R$ {% recebido_este_mes %}</h3>
+                        <p style="font-size: 1.2rem">Recebido este mês</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-bag"></i>
+                        <i class="fa fa-money-bill-wave"></i>
                     </div>
-                    <a href="gestao/resumopagamentos/" class="small-box-footer">Detalhes <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="gestao/resumopagamentos/" class="small-box-footer">Detalhes   <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
         </div>

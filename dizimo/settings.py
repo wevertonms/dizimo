@@ -62,7 +62,18 @@ JAZZMIN_SETTINGS = {
     "site_logo": "images/logo.png",
     "welcome_sign": "Bem-vindo ao DezPorcento!",  # Welcome text on the login screen
     "copyright": "DezPorcento Ltd",  # Copyright on the footer
-    # "hide_models": ["auth.user", "admin.PerfilAdmin"],
+    # "search_model": "auth.User",
+    "navigation_expanded": True,
+    "topmenu_links": [
+        # {"name": "Home", "url": "/home"},
+        # App with dropdown menu to all its models pages (Permissions checked against models)
+        # {"app": "gestao"},
+    ],
+    # "changeform_format": "collapsible",
+    "hide_models": [
+        "auth.user",
+        # "admin.PerfilAdmin",
+    ],
 }
 
 LOGOUT_REDIRECT_URL = "/"
