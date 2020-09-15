@@ -8,7 +8,8 @@ from core.models import Perfil
 
 
 def get_permission(model, permission: str):
-    model_content_type = ContentType.objects.get_for_model(model)
+    model_name = model.__name__.lower()
+    model_content_type = ContentType.objects.filter(model=model_name).first()
     model_permissions = Permission.objects.filter(content_type=model_content_type)
     return model_permissions.get(codename__startswith=permission)
 
