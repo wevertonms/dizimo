@@ -105,14 +105,10 @@ class PerfilAdmin(admin.ModelAdmin):
         return qs.filter(user=user)
 
 
-def user_str(user: User):
-    return f"{user.first_name} {user.last_name} ({user.username})"
-
-
 def igrejas_do_usuário(user):
     gestor_em = Q(gestores__pk=user.pk)
     agente_em = Q(agentes__pk=user.pk)
-    return Igreja.objects.filter(agente_em | gestor_em)
+    return Igreja.objects.filter(agente_em | gestor_em).distinct()
 
 
 def dizimistas_do_usuário(user):
@@ -193,6 +189,7 @@ class PerfilDizimistaInline(admin.StackedInline):
     verbose_name_plural = "Perfil"
     autocomplete_fields = ["user"]
     extra = 1
+    fields = ["nome", "endereco", "nascimento", "genero", "telefone", "email"]
 
     def get_readonly_fields(self, request: HttpRequest, obj: PerfilDizimista):  # noqa
         fields = []
@@ -422,6 +419,26 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
         return qs.filter(dizimista__igreja__in=igrejas)
 
 
+def group_date_by_periord(queryset, period):
+    groups_settings = {
+        "dia": dict(field="day", func=TruncDay, date_format="%Y-%m-%d"),
+        "semana": dict(field="week", func=TruncWeek, date_format="%Y-%m-%d"),
+        "mês": dict(field="month", func=TruncMonth, date_format="%Y-%m"),
+        "ano": dict(field="year", func=TruncYear, date_format="%Y"),
+    }
+    gs = groups_settings[period]
+    truncate_function = gs["func"]
+    queryset = (
+        queryset.annotate(**{period: truncate_function("data")})
+        .order_by(f"-{period}")
+        .values(period, "dizimista__igreja__nome")
+    ).annotate(pagamentos=Count("id"), total_recebido=Sum("valor"))
+    date_format = groups_settings[period]["date_format"]
+    for row in queryset:
+        row[period] = row[period].strftime(date_format)
+    return queryset
+
+
 class GroupByDateListFilter(admin.SimpleListFilter):
     title = _("Agrupar por")
     parameter_name = "group_date_by"
@@ -440,23 +457,29 @@ class GroupByDateListFilter(admin.SimpleListFilter):
         GroupByDateListFilter.selected_group = self.value() or "mês"
         return queryset
 
-    def group_date_by_periord(self, queryset, period):
-        gs = self.groups_settings[self.selected_group]
-        truncate_function = gs["func"]
-        queryset = (
-            queryset.annotate(**{period: truncate_function("data")})
-            .order_by(f"-{period}")
-            .values(period, "dizimista__igreja__nome")
-        ).annotate(pagamentos=Count("id"), total_recebido=Sum("valor"))
-        date_format = self.groups_settings[self.selected_group]["date_format"]
-        for row in queryset:
-            row[period] = row[period].strftime(date_format)
-        return queryset
+
+def format_plot_data(queryset, period):
+    reversed_qs = sorted(queryset, key=lambda x: x[period])
+    igrejas = set(_["dizimista__igreja__nome"] for _ in queryset)
+    plot_data = [
+        dict(
+            x=[_[period] for _ in reversed_qs if _["dizimista__igreja__nome"] == i],
+            y=[
+                float(_["total_recebido"])
+                for _ in reversed_qs
+                if _["dizimista__igreja__nome"] == i
+            ],
+            type="bar",
+            name=i,
+        )
+        for i in igrejas
+    ]
+    return plot_data
 
 
 @admin.register(ResumoPagamentos)
 class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
-    change_list_template = "admin/resumo_pagamentos_change_list.html"
+    change_list_template = "admin/resumopagamentos/change_list.html"
     list_filter = (PagamentoIgrejaFilter, GroupByDateListFilter, DataMonthListFilter)
 
     def get_queryset(self, request: HttpRequest):
@@ -480,26 +503,8 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
             period = self.selected_group
             print(period)
             date_format = self.groups_settings[period]["date_format"]
-            queryset = self.group_date_by_periord(queryset, period)
-            reversed_qs = sorted(queryset, key=lambda x: x[period])
-            igrejas = set(_["dizimista__igreja__nome"] for _ in queryset)
-            plot_data = [
-                dict(
-                    x=[
-                        _[period]
-                        for _ in reversed_qs
-                        if _["dizimista__igreja__nome"] == i
-                    ],
-                    y=[
-                        float(_["total_recebido"])
-                        for _ in reversed_qs
-                        if _["dizimista__igreja__nome"] == i
-                    ],
-                    type="bar",
-                    name=i,
-                )
-                for i in igrejas
-            ]
+            queryset = group_date_by_periord(queryset, period)
+            plot_data = format_plot_data(queryset, period)
             response.context_data["plot_data"] = plot_data
             response.context_data["xaxis"] = dict(
                 title=period.title(), tickformat=date_format

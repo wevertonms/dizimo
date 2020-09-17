@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  web:
+    container_name: django
+    # build: .
+    image: dezporcento:latest
+    # environment:
+    # - SECRET_KEY="asdasd5a4sd51asd65a1s6d1a6sd13a1sd6a1sd3a1s"
+    # command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000

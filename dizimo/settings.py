@@ -18,9 +18,12 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, True),
+    EMAIL_HOST=(str, ""),
+    EMAIL_PORT=(int, 465),
+    EMAIL_HOST_USER=(str, ""),
+    EMAIL_HOST_PASSWORD=(str, ""),
     EMAIL_USE_TLS=(bool, True),
     EMAIL_USE_SSL=(bool, False),
-    EMAIL_PORT=(int),
 )
 # reading .env file
 environ.Env.read_env()
@@ -38,7 +41,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
 # Application definition
 
@@ -62,7 +65,18 @@ JAZZMIN_SETTINGS = {
     "site_logo": "images/logo.png",
     "welcome_sign": "Bem-vindo ao DezPorcento!",  # Welcome text on the login screen
     "copyright": "DezPorcento Ltd",  # Copyright on the footer
-    # "hide_models": ["auth.user", "admin.PerfilAdmin"],
+    # "search_model": "auth.User",
+    "navigation_expanded": True,
+    "topmenu_links": [
+        # {"name": "Home", "url": "/home"},
+        # App with dropdown menu to all its models pages (Permissions checked against models)
+        # {"app": "gestao"},
+    ],
+    # "changeform_format": "collapsible",
+    "hide_models": [
+        "auth.user",
+        # "admin.PerfilAdmin",
+    ],
 }
 
 LOGOUT_REDIRECT_URL = "/"
@@ -83,7 +97,7 @@ ROOT_URLCONF = "dizimo.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["gestao/templates/"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

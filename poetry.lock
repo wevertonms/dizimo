@@ -163,7 +163,7 @@ description = "Faker is a Python package that generates fake data for you."
 name = "faker"
 optional = false
 python-versions = ">=3.5"
-version = "4.1.2"
+version = "4.1.3"
 
 [package.dependencies]
 python-dateutil = ">=2.4"
@@ -408,10 +408,10 @@ with_vulture = ["vulture (>=1.5)"]
 [[package]]
 category = "main"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
-name = "psycopg2"
+name = "psycopg2-binary"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
-version = "2.8.5"
+version = "2.8.6"
 
 [[package]]
 category = "dev"
@@ -455,7 +455,7 @@ description = "Pygments is a syntax highlighting package written in Python."
 name = "pygments"
 optional = false
 python-versions = ">=3.5"
-version = "2.6.1"
+version = "2.7.0"
 
 [[package]]
 category = "dev"
@@ -649,7 +649,7 @@ description = "Traitlets Python configuration system"
 name = "traitlets"
 optional = false
 python-versions = ">=3.7"
-version = "5.0.3"
+version = "5.0.4"
 
 [package.dependencies]
 ipython-genutils = "*"
@@ -701,7 +701,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "e61e9a9c6899c74203d713c245b49967869a7f4a346c2bae08f3c95622e89848"
+content-hash = "36eb9cc71a9446fc2e6d17d83f289031dfbc2b572f30f67338738d3665b3aec8"
 lock-version = "1.0"
 python-versions = "^3.8"
 
@@ -765,8 +765,8 @@ dodgy = [
     {file = "dodgy-0.2.1.tar.gz", hash = "sha256:28323cbfc9352139fdd3d316fa17f325cc0e9ac74438cbba51d70f9b48f86c3a"},
 ]
 faker = [
-    {file = "Faker-4.1.2-py3-none-any.whl", hash = "sha256:bc4b8c908dfcd84e4fe5d9fa2e52fbe17546515fb8f126909b98c47badf05658"},
-    {file = "Faker-4.1.2.tar.gz", hash = "sha256:ff188c416864e3f7d8becd8f9ee683a4b4101a2a2d2bcdcb3e84bb1bdd06eaae"},
+    {file = "Faker-4.1.3-py3-none-any.whl", hash = "sha256:80bab8d46035a7393de827210c5d39c17109d3346d131946bde622137120c496"},
+    {file = "Faker-4.1.3.tar.gz", hash = "sha256:075a95ac4c95765370919d787dcd958acfaea635005ad5af4d926cb0973800db"},
 ]
 flake8 = [
     {file = "flake8-3.8.3-py2.py3-none-any.whl", hash = "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c"},
@@ -860,20 +860,39 @@ prompt-toolkit = [
 prospector = [
     {file = "prospector-1.3.0.tar.gz", hash = "sha256:43e5e187c027336b0e4c4aa6a82d66d3b923b5ec5b51968126132e32f9d14a2f"},
 ]
-psycopg2 = [
-    {file = "psycopg2-2.8.5-cp27-cp27m-win32.whl", hash = "sha256:a0984ff49e176062fcdc8a5a2a670c9bb1704a2f69548bce8f8a7bad41c661bf"},
-    {file = "psycopg2-2.8.5-cp27-cp27m-win_amd64.whl", hash = "sha256:acf56d564e443e3dea152efe972b1434058244298a94348fc518d6dd6a9fb0bb"},
-    {file = "psycopg2-2.8.5-cp34-cp34m-win32.whl", hash = "sha256:440a3ea2c955e89321a138eb7582aa1d22fe286c7d65e26a2c5411af0a88ae72"},
-    {file = "psycopg2-2.8.5-cp34-cp34m-win_amd64.whl", hash = "sha256:6b306dae53ec7f4f67a10942cf8ac85de930ea90e9903e2df4001f69b7833f7e"},
-    {file = "psycopg2-2.8.5-cp35-cp35m-win32.whl", hash = "sha256:d3b29d717d39d3580efd760a9a46a7418408acebbb784717c90d708c9ed5f055"},
-    {file = "psycopg2-2.8.5-cp35-cp35m-win_amd64.whl", hash = "sha256:6a471d4d2a6f14c97a882e8d3124869bc623f3df6177eefe02994ea41fd45b52"},
-    {file = "psycopg2-2.8.5-cp36-cp36m-win32.whl", hash = "sha256:27c633f2d5db0fc27b51f1b08f410715b59fa3802987aec91aeb8f562724e95c"},
-    {file = "psycopg2-2.8.5-cp36-cp36m-win_amd64.whl", hash = "sha256:2df2bf1b87305bd95eb3ac666ee1f00a9c83d10927b8144e8e39644218f4cf81"},
-    {file = "psycopg2-2.8.5-cp37-cp37m-win32.whl", hash = "sha256:ac5b23d0199c012ad91ed1bbb971b7666da651c6371529b1be8cbe2a7bf3c3a9"},
-    {file = "psycopg2-2.8.5-cp37-cp37m-win_amd64.whl", hash = "sha256:2c0afb40cfb4d53487ee2ebe128649028c9a78d2476d14a67781e45dc287f080"},
-    {file = "psycopg2-2.8.5-cp38-cp38-win32.whl", hash = "sha256:2327bf42c1744a434ed8ed0bbaa9168cac7ee5a22a9001f6fc85c33b8a4a14b7"},
-    {file = "psycopg2-2.8.5-cp38-cp38-win_amd64.whl", hash = "sha256:132efc7ee46a763e68a815f4d26223d9c679953cd190f1f218187cb60decf535"},
-    {file = "psycopg2-2.8.5.tar.gz", hash = "sha256:f7d46240f7a1ae1dd95aab38bd74f7428d46531f69219954266d669da60c0818"},
+psycopg2-binary = [
+    {file = "psycopg2-binary-2.8.6.tar.gz", hash = "sha256:11b9c0ebce097180129e422379b824ae21c8f2a6596b159c7659e2e5a00e1aa0"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27m-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:d14b140a4439d816e3b1229a4a525df917d6ea22a0771a2a78332273fd9528a4"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:1fabed9ea2acc4efe4671b92c669a213db744d2af8a9fc5d69a8e9bc14b7a9db"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:f5ab93a2cb2d8338b1674be43b442a7f544a0971da062a5da774ed40587f18f5"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27m-win32.whl", hash = "sha256:b4afc542c0ac0db720cf516dd20c0846f71c248d2b3d21013aa0d4ef9c71ca25"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27m-win_amd64.whl", hash = "sha256:e74a55f6bad0e7d3968399deb50f61f4db1926acf4a6d83beaaa7df986f48b1c"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27mu-manylinux1_i686.whl", hash = "sha256:0deac2af1a587ae12836aa07970f5cb91964f05a7c6cdb69d8425ff4c15d4e2c"},
+    {file = "psycopg2_binary-2.8.6-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:ad20d2eb875aaa1ea6d0f2916949f5c08a19c74d05b16ce6ebf6d24f2c9f75d1"},
+    {file = "psycopg2_binary-2.8.6-cp34-cp34m-win32.whl", hash = "sha256:950bc22bb56ee6ff142a2cb9ee980b571dd0912b0334aa3fe0fe3788d860bea2"},
+    {file = "psycopg2_binary-2.8.6-cp34-cp34m-win_amd64.whl", hash = "sha256:b8a3715b3c4e604bcc94c90a825cd7f5635417453b253499664f784fc4da0152"},
+    {file = "psycopg2_binary-2.8.6-cp35-cp35m-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:d1b4ab59e02d9008efe10ceabd0b31e79519da6fb67f7d8e8977118832d0f449"},
+    {file = "psycopg2_binary-2.8.6-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:ac0c682111fbf404525dfc0f18a8b5f11be52657d4f96e9fcb75daf4f3984859"},
+    {file = "psycopg2_binary-2.8.6-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:7d92a09b788cbb1aec325af5fcba9fed7203897bbd9269d5691bb1e3bce29550"},
+    {file = "psycopg2_binary-2.8.6-cp35-cp35m-win32.whl", hash = "sha256:aaa4213c862f0ef00022751161df35804127b78adf4a2755b9f991a507e425fd"},
+    {file = "psycopg2_binary-2.8.6-cp35-cp35m-win_amd64.whl", hash = "sha256:c2507d796fca339c8fb03216364cca68d87e037c1f774977c8fc377627d01c71"},
+    {file = "psycopg2_binary-2.8.6-cp36-cp36m-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:ee69dad2c7155756ad114c02db06002f4cded41132cc51378e57aad79cc8e4f4"},
+    {file = "psycopg2_binary-2.8.6-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:e82aba2188b9ba309fd8e271702bd0d0fc9148ae3150532bbb474f4590039ffb"},
+    {file = "psycopg2_binary-2.8.6-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:d5227b229005a696cc67676e24c214740efd90b148de5733419ac9aaba3773da"},
+    {file = "psycopg2_binary-2.8.6-cp36-cp36m-win32.whl", hash = "sha256:a0eb43a07386c3f1f1ebb4dc7aafb13f67188eab896e7397aa1ee95a9c884eb2"},
+    {file = "psycopg2_binary-2.8.6-cp36-cp36m-win_amd64.whl", hash = "sha256:e1f57aa70d3f7cc6947fd88636a481638263ba04a742b4a37dd25c373e41491a"},
+    {file = "psycopg2_binary-2.8.6-cp37-cp37m-macosx_10_6_intel.macosx_10_9_intel.macosx_10_9_x86_64.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:833709a5c66ca52f1d21d41865a637223b368c0ee76ea54ca5bad6f2526c7679"},
+    {file = "psycopg2_binary-2.8.6-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:ba28584e6bca48c59eecbf7efb1576ca214b47f05194646b081717fa628dfddf"},
+    {file = "psycopg2_binary-2.8.6-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:6a32f3a4cb2f6e1a0b15215f448e8ce2da192fd4ff35084d80d5e39da683e79b"},
+    {file = "psycopg2_binary-2.8.6-cp37-cp37m-win32.whl", hash = "sha256:0e4dc3d5996760104746e6cfcdb519d9d2cd27c738296525d5867ea695774e67"},
+    {file = "psycopg2_binary-2.8.6-cp37-cp37m-win_amd64.whl", hash = "sha256:cec7e622ebc545dbb4564e483dd20e4e404da17ae07e06f3e780b2dacd5cee66"},
+    {file = "psycopg2_binary-2.8.6-cp38-cp38-macosx_10_9_x86_64.macosx_10_9_intel.macosx_10_10_intel.macosx_10_10_x86_64.whl", hash = "sha256:ba381aec3a5dc29634f20692349d73f2d21f17653bda1decf0b52b11d694541f"},
+    {file = "psycopg2_binary-2.8.6-cp38-cp38-manylinux1_i686.whl", hash = "sha256:a0c50db33c32594305b0ef9abc0cb7db13de7621d2cadf8392a1d9b3c437ef77"},
+    {file = "psycopg2_binary-2.8.6-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:2dac98e85565d5688e8ab7bdea5446674a83a3945a8f416ad0110018d1501b94"},
+    {file = "psycopg2_binary-2.8.6-cp38-cp38-win32.whl", hash = "sha256:bd1be66dde2b82f80afb9459fc618216753f67109b859a361cf7def5c7968729"},
+    {file = "psycopg2_binary-2.8.6-cp38-cp38-win_amd64.whl", hash = "sha256:8cd0fb36c7412996859cb4606a35969dd01f4ea34d9812a141cd920c3b18be77"},
+    {file = "psycopg2_binary-2.8.6-cp39-cp39-manylinux1_i686.whl", hash = "sha256:42ec1035841b389e8cc3692277a0bd81cdfe0b65d575a2c8862cec7a80e62e52"},
+    {file = "psycopg2_binary-2.8.6-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:7312e931b90fe14f925729cde58022f5d034241918a5c4f9797cac62f6b3a9dd"},
 ]
 ptyprocess = [
     {file = "ptyprocess-0.6.0-py2.py3-none-any.whl", hash = "sha256:d7cc528d76e76342423ca640335bd3633420dc1366f258cb31d05e865ef5ca1f"},
@@ -892,8 +911,8 @@ pyflakes = [
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
 ]
 pygments = [
-    {file = "Pygments-2.6.1-py3-none-any.whl", hash = "sha256:ff7a40b4860b727ab48fad6360eb351cc1b33cbf9b15a0f689ca5353e9463324"},
-    {file = "Pygments-2.6.1.tar.gz", hash = "sha256:647344a061c249a3b74e230c739f434d7ea4d8b1d5f3721bc0f3558049b38f44"},
+    {file = "Pygments-2.7.0-py3-none-any.whl", hash = "sha256:2df50d16b45b977217e02cba6c8422aaddb859f3d0570a88e09b00eafae89c6e"},
+    {file = "Pygments-2.7.0.tar.gz", hash = "sha256:2594e8fdb06fef91552f86f4fd3a244d148ab24b66042036e64f29a291515048"},
 ]
 pylint = [
     {file = "pylint-2.5.2-py3-none-any.whl", hash = "sha256:dd506acce0427e9e08fb87274bcaa953d38b50a58207170dbf5b36cf3e16957b"},
@@ -990,8 +1009,8 @@ toml = [
     {file = "toml-0.10.1.tar.gz", hash = "sha256:926b612be1e5ce0634a2ca03470f95169cf16f939018233a670519cb4ac58b0f"},
 ]
 traitlets = [
-    {file = "traitlets-5.0.3-py3-none-any.whl", hash = "sha256:8bdadb17a04c844f444cdefaa3dee47a12ff14cf6277b9eeda29bfa0659d5987"},
-    {file = "traitlets-5.0.3.tar.gz", hash = "sha256:a2e91709a0330b6c5d497ed470b2feb1ed8da5c9dd807c6daab41f727b9391c9"},
+    {file = "traitlets-5.0.4-py3-none-any.whl", hash = "sha256:9664ec0c526e48e7b47b7d14cd6b252efa03e0129011de0a9c1d70315d4309c3"},
+    {file = "traitlets-5.0.4.tar.gz", hash = "sha256:86c9351f94f95de9db8a04ad8e892da299a088a64fd283f9f6f18770ae5eae1b"},
 ]
 typed-ast = [
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:73d785a950fc82dd2a25897d525d003f6378d1cb23ab305578394694202a58c3"},
