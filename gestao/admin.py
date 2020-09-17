@@ -108,7 +108,7 @@ class PerfilAdmin(admin.ModelAdmin):
 def igrejas_do_usuário(user):
     gestor_em = Q(gestores__pk=user.pk)
     agente_em = Q(agentes__pk=user.pk)
-    return Igreja.objects.filter(agente_em | gestor_em)
+    return Igreja.objects.filter(agente_em | gestor_em).distinct()
 
 
 def dizimistas_do_usuário(user):

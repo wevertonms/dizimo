@@ -72,6 +72,17 @@ def adicionar_dizimistas_e_pagamentos(
     print("Pagamentos adicionados!")
 
 
+def create_teste_user():
+    teste = User.objects.create_user(
+        username="teste",
+        password="teste",
+        is_staff=True,
+    )  # type: User
+    Perfil.objects.create(user=teste, **profile_data())
+    teste.groups.add(GESTORES_GROUP())
+    teste.save()
+
+
 def adicionar_igrejas(num_igrejas=3, gestores_por_igreja=1, agentes_por_igreja=2):
     for i in range(num_igrejas):
         igreja = Igreja.objects.create(
