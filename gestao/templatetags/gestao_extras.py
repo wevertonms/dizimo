@@ -12,7 +12,7 @@ register = template.Library()
 def pagamentos(user):
     igrejas = igrejas_do_usuário(user)
     if user.is_superuser:
-        user_filter = dict()
+        user_filter = {}
     else:
         user_filter = dict(dizimista__igreja__in=igrejas)
     return Pagamento.objects.filter(data__month__gte=now().month, **user_filter)

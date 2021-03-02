@@ -98,7 +98,7 @@ class PerfilAdmin(admin.ModelAdmin):
                         "dizimista",
                     ]
             return fields
-        return tuple()
+        return ()
 
     def get_queryset(self, request: HttpRequest):
         qs = super().get_queryset(request)
@@ -212,7 +212,7 @@ class PerfilDizimistaInline(admin.StackedInline):
                             "user",
                         ]
             return fields
-        return tuple()
+        return ()
 
 
 class PagamentoInline(admin.TabularInline):
