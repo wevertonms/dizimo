@@ -1,10 +1,11 @@
-from faker import Faker
 from random import choice, random
 
-from core.models import Perfil
-from gestao.models import Dizimista, Igreja, Pagamento, User, PerfilDizimista
-from gestao.admin import GESTORES_GROUP, AGENTES_GROUP
 from django.utils import timezone
+from faker import Faker
+
+from core.models import Perfil
+from gestao.admin import AGENTES_GROUP, GESTORES_GROUP
+from gestao.models import Dizimista, Igreja, Pagamento, PerfilDizimista, User
 
 FAKER = Faker("pt-BR")
 TAXA_DE_INADIMPLENCIA = 0.9

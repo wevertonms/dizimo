@@ -3,16 +3,19 @@ from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models import Count, Q, Sum
-from django.db.models.functions import TruncMonth, TruncDay, TruncWeek, TruncYear
+from django.db.models.functions import (TruncDay, TruncMonth, TruncWeek,
+                                        TruncYear)
 from django.http import FileResponse, HttpRequest
 from django.template.loader import render_to_string
 from django.utils.timezone import datetime, now, timedelta
 from django.utils.translation import gettext_lazy as _
 
-from .models import Dizimista, Igreja, Pagamento, ResumoPagamentos, PerfilDizimista
-from core.models import Perfil
 from core.admin import get_permission
+from core.models import Perfil
 from dizimo.settings import EMAIL_HOST_USER
+
+from .models import (Dizimista, Igreja, Pagamento, PerfilDizimista,
+                     ResumoPagamentos)
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"

@@ -6,24 +6,23 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gestao', '0009_auto_20200908_0101'),
+        ("gestao", "0009_auto_20200908_0101"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='ResumoDiarios',
+            name="ResumoDiarios",
         ),
         migrations.CreateModel(
-            name='ResumoMenal',
-            fields=[
-            ],
+            name="ResumoMenal",
+            fields=[],
             options={
-                'verbose_name': 'Resumo Mensal',
-                'verbose_name_plural': 'Resumos Mensais',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Resumo Mensal",
+                "verbose_name_plural": "Resumos Mensais",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('gestao.pagamento',),
+            bases=("gestao.pagamento",),
         ),
     ]

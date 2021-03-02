@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gestao', '0017_remove_pagamento_igreja'),
+        ("gestao", "0017_remove_pagamento_igreja"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='dizimista',
-            name='dizimo',
-            field=models.DecimalField(decimal_places=2, max_digits=14, null=True, verbose_name='Dízimo'),
+            model_name="dizimista",
+            name="dizimo",
+            field=models.DecimalField(
+                decimal_places=2, max_digits=14, null=True, verbose_name="Dízimo"
+            ),
         ),
     ]
