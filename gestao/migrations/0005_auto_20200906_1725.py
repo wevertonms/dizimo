@@ -8,18 +8,22 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('gestao', '0004_auto_20200905_1654'),
+        ("gestao", "0004_auto_20200905_1654"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='igreja',
-            name='agentes',
-            field=models.ManyToManyField(related_name='agente_em', to=settings.AUTH_USER_MODEL),
+            model_name="igreja",
+            name="agentes",
+            field=models.ManyToManyField(
+                related_name="agente_em", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterField(
-            model_name='igreja',
-            name='coordenadores',
-            field=models.ManyToManyField(related_name='coordenador_em', to=settings.AUTH_USER_MODEL),
+            model_name="igreja",
+            name="coordenadores",
+            field=models.ManyToManyField(
+                related_name="coordenador_em", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

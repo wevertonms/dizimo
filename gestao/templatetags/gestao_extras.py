@@ -1,13 +1,10 @@
 from django import template
-from gestao.models import Pagamento
-from gestao.admin import (
-    igrejas_do_usuário,
-    dizimistas_do_usuário,
-    format_plot_data,
-    group_date_by_periord,
-)
-from django.utils.timezone import now
 from django.db.models import Sum
+from django.utils.timezone import now
+
+from gestao.admin import (dizimistas_do_usuário, format_plot_data,
+                          group_date_by_periord, igrejas_do_usuário)
+from gestao.models import Pagamento
 
 register = template.Library()
 

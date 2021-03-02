@@ -6,29 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gestao', '0012_auto_20200908_0118'),
+        ("gestao", "0012_auto_20200908_0118"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='ResumoMensal',
+            name="ResumoMensal",
         ),
         migrations.CreateModel(
-            name='ResumoPagamentos',
-            fields=[
-            ],
+            name="ResumoPagamentos",
+            fields=[],
             options={
-                'verbose_name': 'Resumo de pagamentos',
-                'verbose_name_plural': 'Resumos de pagamentos',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Resumo de pagamentos",
+                "verbose_name_plural": "Resumos de pagamentos",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('gestao.pagamento',),
+            bases=("gestao.pagamento",),
         ),
         migrations.AlterField(
-            model_name='dizimista',
-            name='genero',
-            field=models.CharField(choices=[('F', 'Feminino'), ('M', 'Masculino'), ('O', 'Outro')], default='F', max_length=1, verbose_name='Gênero'),
+            model_name="dizimista",
+            name="genero",
+            field=models.CharField(
+                choices=[("F", "Feminino"), ("M", "Masculino"), ("O", "Outro")],
+                default="F",
+                max_length=1,
+                verbose_name="Gênero",
+            ),
         ),
     ]
