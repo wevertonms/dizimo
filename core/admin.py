@@ -37,7 +37,7 @@ class PerfilInline(admin.StackedInline):
                         "email",
                     ]
             return fields
-        return tuple()
+        return ()
 
 
 # Unregister the provided model admin
