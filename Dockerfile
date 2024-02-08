@@ -25,7 +25,7 @@ RUN pip install -r requirements.txt
 # Copy the rest of the code.
 COPY . /code/
 
-RUN apt-get install wkhtml2pdf
+# RUN apt-get install wkhtml2pdf
 
 ENV SECRET_KEY="asdasd5a4sd51asd65a1s6d1a6sd13a1sd6a1sd3a1s"
 
