@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("gestao", "0016_remove_dizimista_perfil"),
         ("core", "0004_auto_20200913_1625"),
