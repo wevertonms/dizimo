@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0002_auto_20200913_1022"),
         ("gestao", "0014_auto_20200913_1608"),
