@@ -156,7 +156,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DATE_INPUT_FORMATS = (
     "%d/%m/%Y",
