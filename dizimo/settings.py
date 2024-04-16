@@ -164,8 +164,8 @@ DATE_INPUT_FORMATS = (
 )
 
 DATE_FORMAT = "d/m/y"
-TIME_FORMAT = "H:i\h"  # noqa
-DATETIME_FORMAT = "d/m/y à\s H:i\h"  # noqa
+TIME_FORMAT = "H:i"
+DATETIME_FORMAT = "d/m/y às H:i"
 DECIMAL_SEPARATOR = ","
 USE_THOUSAND_SEPARATOR = True
 THOUSAND_SEPARATOR = "."
