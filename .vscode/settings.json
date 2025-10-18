@@ -4,13 +4,14 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "cSpell.words": [
+        "envfile",
         "Genero",
-        "INADIMPLENCIA",
-        "Unregister",
         "gestao",
+        "INADIMPLENCIA",
         "noqa",
         "pylint",
         "strftime",
+        "Unregister",
         "xaxis",
         "yaxis"
     ],

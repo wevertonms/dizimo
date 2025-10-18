@@ -6,8 +6,7 @@ services:
     image: dezporcento:latest
     build:
       context: .
-    environment:
-      SECRET_KEY: "secret-key"
-      ADMIN_PASSWORD: 123
+    env_file:
+      - .env
     ports:
       - 8000:8000
