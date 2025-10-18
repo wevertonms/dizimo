@@ -1,34 +1,33 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8-slim-buster
+FROM python:3.8-slim
 
-# Keeps Python from generating .pyc files in the container
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
-# Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
-# Make a new directory to put our code in.
-RUN mkdir /code
+# Set work directory
+WORKDIR /app
 
-# Change the working directory.
-# Every command after this will be run from the /code directory.
-WORKDIR /code
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y build-essential libpq-dev curl && \
+    apt-get clean
 
-# Copy the requirements.txt file.
-COPY ./requirements.txt /code/
+# Copy project files
+COPY requirements.txt /app/
 
-# Upgrade pip
-RUN pip install --upgrade pip
-
-# Install the requirements.
+# Install dependencies
 RUN pip install -r requirements.txt
 
-# Copy the rest of the code.
-COPY . /code/
+# Copy the rest of the project
+COPY . /app/
 
-# RUN apt-get install wkhtml2pdf
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-ENV SECRET_KEY="asdasd5a4sd51asd65a1s6d1a6sd13a1sd6a1sd3a1s"
+# Expose port
+EXPOSE 8000
 
-RUN python manage.py makemigrations && python manage.py migrate
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["gunicorn", "dizimo.wsgi:application", "--bind", "0.0.0.0:8000"]
