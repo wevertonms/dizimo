@@ -2,7 +2,6 @@
 set -e
 
 python manage.py migrate
-python manage.py collectstatic --noinput
 
 # Create admin user if it doesn't exist
 python << END

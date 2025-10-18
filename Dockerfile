@@ -22,6 +22,8 @@ RUN pip install -r requirements.txt
 # Copy the rest of the project
 COPY . /app/
 
+RUN python manage.py collectstatic --noinput
+
 # Copy entrypoint script
 COPY entrypoint.sh entrypoint.sh
 RUN chmod +x entrypoint.sh
