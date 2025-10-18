@@ -19,6 +19,9 @@ description = "Sistema de gestão de dizimo"
 
 [dependency-groups]
 dev = ["faker<5.0.0,>=4.1.2", "ipython<8.0.0,>=7.18.1"]
+typing = [
+    "django-types>=0.20.0",
+]
 
 [build-system]
 requires = ["pdm-backend"]
@@ -31,3 +34,4 @@ envfile = ".env"
 mm = { cmd = "python manage.py makemigrations", help = "python manage.py makemigrations" }
 mi = { cmd = "python manage.py migrate", help = "python manage.py migrate" }
 cs = { cmd = "python manage.py collectstatic --noinput", help = "python manage.py collectstatic --noinput" }
+run = { cmd = "./entrypoint.sh python manage.py runserver", help = "python manage.py collectstatic --noinput" }
