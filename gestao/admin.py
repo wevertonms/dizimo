@@ -127,7 +127,9 @@ class ExportPdfMixin:
         headers = [field.verbose_name for field in meta.fields]
         title = str(meta).split(".")[1] + "s"
         filename = f"{title}_{now().strftime('%Y_%m_%d')}.pdf"
-        data = [{field: getattr(obj, field) for field in field_names} for obj in queryset]
+        data = [
+            {field: getattr(obj, field) for field in field_names} for obj in queryset
+        ]
         html = render_to_string(
             "admin/export_as_pdf.html",
             dict(title=title.title(), headers=headers, data=data),
@@ -343,7 +345,9 @@ class RegistradoPorListFilter(admin.SimpleListFilter):
     parameter_name = "registrado_por"
 
     def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin):  # noqa
-        registradores = set(p.registrado_por for p in model_admin.get_queryset(request).all())
+        registradores = set(
+            p.registrado_por for p in model_admin.get_queryset(request).all()
+        )
         return [(r.id, r.perfil) for r in registradores if r]
 
     def queryset(self, request: HttpRequest, queryset):
@@ -461,7 +465,11 @@ def format_plot_data(queryset, period):
     plot_data = [
         dict(
             x=[_[period] for _ in reversed_qs if _["dizimista__igreja__nome"] == i],
-            y=[float(_["total_recebido"]) for _ in reversed_qs if _["dizimista__igreja__nome"] == i],
+            y=[
+                float(_["total_recebido"])
+                for _ in reversed_qs
+                if _["dizimista__igreja__nome"] == i
+            ],
             type="bar",
             name=i,
         )
@@ -501,7 +509,9 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
             queryset = group_date_by_periord(queryset, period)
             plot_data = format_plot_data(queryset, period)
             response.context_data["plot_data"] = plot_data
-            response.context_data["xaxis"] = dict(title=period.title(), tickformat=date_format)
+            response.context_data["xaxis"] = dict(
+                title=period.title(), tickformat=date_format
+            )
             response.context_data["yaxis"] = dict(title="Total Recebido (R$)")
             response.context_data["plot_id"] = "chart"
             response.context_data["data"] = queryset
