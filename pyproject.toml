@@ -1,17 +1,14 @@
 [project]
 authors = [{ name = "Weverton Marques", email = "wevertonms@gmail.com" }]
-requires-python = "<4.0,>=3.8"
+requires-python = "<4.0,>=3.10"
 dependencies = [
-    "django<4.0.0,>=3.1.1",
-    "django-jazzmin<3.0.0,>=2.2.7",
-    "gunicorn<21.0.0,>=20.0.4",
-    "dj-database-url<1.0.0,>=0.5.0",
-    "whitenoise<6.0.0,>=5.2.0",
-    "psycopg2-binary<3.0.0,>=2.8.6",
-    "dj-static<1.0.0,>=0.0.6",
-    "static3<1.0.0,>=0.7.0",
-    "django-environ<1.0.0,>=0.4.5",
-    "pdfkit<1.0.0,>=0.6.1",
+    "django>=5.2.7",
+    "django-jazzmin>=3.0.1",
+    "gunicorn>=23.0.0",
+    "whitenoise>=6.11.0",
+    "django-environ>=0.12.0",
+    "psycopg[binary]>=3.2.10",
+    "pdfkit>=1.0.0",
 ]
 name = "dizimo"
 version = "0.1.0"
@@ -19,9 +16,7 @@ description = "Sistema de gestão de dizimo"
 
 [dependency-groups]
 dev = ["faker<5.0.0,>=4.1.2", "ipython<8.0.0,>=7.18.1"]
-typing = [
-    "django-types>=0.20.0",
-]
+typing = ["django-types>=0.20.0"]
 
 [build-system]
 requires = ["pdm-backend"]
