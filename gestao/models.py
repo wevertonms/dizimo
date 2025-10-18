@@ -6,20 +6,21 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
 
 from core.models import Perfil
 
 
 class Igreja(models.Model):
-    nome = models.CharField(_("Nome"), max_length=50)
-    endereco = models.CharField(_("Endereço"), max_length=255, null=True)
+    nome = models.CharField("Nome", max_length=50)
+    endereco = models.CharField("Endereço", max_length=255, null=True)
     gestores = models.ManyToManyField(User, related_name="gestor_em")
     agentes = models.ManyToManyField(User, related_name="agente_em")
 
+    dizimista_set: models.QuerySet["Dizimista"]
+
     class Meta:
-        verbose_name = _("Igreja")
-        verbose_name_plural = _("Igrejas")
+        verbose_name = "Igreja"
+        verbose_name_plural = "Igrejas"
 
     def __str__(self):
         return self.nome
@@ -49,8 +50,8 @@ class Dizimista(models.Model):
     dizimo = models.DecimalField("Dízimo", max_digits=14, decimal_places=2, null=True)
 
     class Meta:
-        verbose_name = _("Dizimista")
-        verbose_name_plural = _("Dizimistas")
+        verbose_name = "Dizimista"
+        verbose_name_plural = "Dizimistas"
 
     def __str__(self):
         return f"{self.perfil}"
@@ -80,18 +81,18 @@ class Dizimista(models.Model):
 class Pagamento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     dizimista = models.ForeignKey(Dizimista, on_delete=models.SET_NULL, null=True)
-    data = models.DateTimeField(_("Data e hora"), default=timezone.now)
-    valor = models.DecimalField(_("Valor"), max_digits=14, decimal_places=2)
+    data = models.DateTimeField("Data e hora", default=timezone.now)
+    valor = models.DecimalField("Valor", max_digits=14, decimal_places=2)
     registrado_por = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_("Registrado por"),
+        verbose_name="Registrado por",
         on_delete=models.SET_NULL,
         null=True,
     )
 
     class Meta:
-        verbose_name = _("Pagamento")
-        verbose_name_plural = _("Pagamentos")
+        verbose_name = "Pagamento"
+        verbose_name_plural = "Pagamentos"
         ordering = ["-data"]
 
     def __str__(self):

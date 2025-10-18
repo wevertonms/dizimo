@@ -3,8 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.db.models import Count, Q, Sum
-from django.db.models.functions import (TruncDay, TruncMonth, TruncWeek,
-                                        TruncYear)
+from django.db.models.functions import TruncDay, TruncMonth, TruncWeek, TruncYear
 from django.http import FileResponse, HttpRequest
 from django.template.loader import render_to_string
 from django.utils.timezone import datetime, now, timedelta
@@ -14,8 +13,7 @@ from core.admin import get_permission
 from core.models import Perfil
 from dizimo.settings import EMAIL_HOST_USER
 
-from .models import (Dizimista, Igreja, Pagamento, PerfilDizimista,
-                     ResumoPagamentos)
+from .models import Dizimista, Igreja, Pagamento, PerfilDizimista, ResumoPagamentos
 
 admin.site.site_header = "DezPorcento"
 admin.site.site_title = "DezPorcento"
@@ -124,14 +122,12 @@ def dizimistas_do_usuário(user):
 
 class ExportPdfMixin:
     def export_as_pdf(self, request: HttpRequest, queryset):
-        meta = self.model._meta
+        meta = self.model._meta  # pyright: ignore[reportAttributeAccessIssue]
         field_names = [field.name for field in meta.fields]
         headers = [field.verbose_name for field in meta.fields]
         title = str(meta).split(".")[1] + "s"
-        filename = f'{title}_{now().strftime("%Y_%m_%d")}.pdf'
-        data = [
-            {field: getattr(obj, field) for field in field_names} for obj in queryset
-        ]
+        filename = f"{title}_{now().strftime('%Y_%m_%d')}.pdf"
+        data = [{field: getattr(obj, field) for field in field_names} for obj in queryset]
         html = render_to_string(
             "admin/export_as_pdf.html",
             dict(title=title.title(), headers=headers, data=data),
@@ -153,7 +149,7 @@ class ExportPdfMixin:
 class DataMonthListFilter(admin.SimpleListFilter):
     # Human-readable title which will be displayed in the
     # right admin sidebar just above the filter options.
-    title = _("Mês")
+    title = "Mês"
     # Parameter for the filter that will be used in the URL query.
     parameter_name = "mes"
     field = "data__month"
@@ -176,7 +172,7 @@ class DataMonthListFilter(admin.SimpleListFilter):
 
 
 class AniversarioMesListFilter(DataMonthListFilter):
-    title = _("Anversariante do mês")
+    title = "Anversariante do mês"
     parameter_name = "aniversario_mes"
     field = "perfil__nascimento__month"
 
@@ -200,8 +196,8 @@ class PerfilDizimistaInline(admin.StackedInline):
         is_superuser = user.is_superuser
         if not is_superuser:
             if hasattr(obj, "perfil"):
-                if hasattr(obj.perfil, "user"):
-                    if obj.perfil.user:
+                if hasattr(obj.perfil, "user"):  # type: ignore
+                    if obj.perfil.user:  # type: ignore
                         fields += [
                             "nome",
                             "endereco",
@@ -224,7 +220,7 @@ class PagamentoInline(admin.TabularInline):
 
     def save_model(self, request: HttpRequest, obj, form, change):
         obj.registrado_por = request.user
-        super().save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)  # type: ignore
         try:
             destinatários = []
             if obj.dizimista.email:
@@ -233,18 +229,18 @@ class PagamentoInline(admin.TabularInline):
                 subject="Registro de pagamento",
                 message="",
                 html_message=render_to_string("pagamento.html/", dict(obj=obj)),
-                from_email=EMAIL_HOST_USER,
+                from_email=EMAIL_HOST_USER,  # type: ignore
                 recipient_list=destinatários,
                 fail_silently=False,
             )
-            self.message_user(request, "E-mails enviados com sucesso.", level="success")
+            self.message_user(request, "E-mails enviados com sucesso.", level="success")  # type: ignore[reportAttributeAccessIssue]
         except Exception as e:
             print(e)
-            self.message_user(request, "Erro ao enviar e-mail", level="error")
+            self.message_user(request, "Erro ao enviar e-mail", level="error")  # type: ignore[reportAttributeAccessIssue]
 
 
 class IgrejaListFilter(admin.SimpleListFilter):
-    title = _("Igreja")
+    title = "Igreja"
     parameter_name = "igreja"
     field = "igreja__pk"
 
@@ -270,8 +266,8 @@ class UltimoPagamentoListFilter(admin.SimpleListFilter):
         return [(i, _(f"{i} dias atrás")) for i in [30, 60, 90]]
 
     def queryset(self, request: HttpRequest, queryset):
-        if self.value():
-            dias_atras = now() - timedelta(days=int(self.value()) + 1)
+        if value := self.value():
+            dias_atras = now() - timedelta(days=int(value) + 1)
             return queryset.exclude(pagamento__data__gt=dias_atras)
         return queryset
 
@@ -343,13 +339,11 @@ class IgrejaAdmin(admin.ModelAdmin, ExportPdfMixin):
 
 
 class RegistradoPorListFilter(admin.SimpleListFilter):
-    title = _("Registrado Por")
+    title = "Registrado Por"
     parameter_name = "registrado_por"
 
     def lookups(self, request: HttpRequest, model_admin: admin.ModelAdmin):  # noqa
-        registradores = set(
-            p.registrado_por for p in model_admin.get_queryset(request).all()
-        )
+        registradores = set(p.registrado_por for p in model_admin.get_queryset(request).all())
         return [(r.id, r.perfil) for r in registradores if r]
 
     def queryset(self, request: HttpRequest, queryset):
@@ -395,7 +389,7 @@ class PagamentoAdmin(admin.ModelAdmin, ExportPdfMixin):
                 subject="Registro de pagamento",
                 message="",
                 html_message=render_to_string("pagamento.html/", dict(obj=obj)),
-                from_email=EMAIL_HOST_USER,
+                from_email=EMAIL_HOST_USER,  # pyright: ignore[reportArgumentType]
                 recipient_list=destinatários,
                 fail_silently=False,
             )
@@ -443,7 +437,7 @@ def group_date_by_periord(queryset, period):
 
 
 class GroupByDateListFilter(admin.SimpleListFilter):
-    title = _("Agrupar por")
+    title = "Agrupar por"
     parameter_name = "group_date_by"
     groups_settings = {
         "dia": dict(field="day", func=TruncDay, date_format="%Y-%m-%d"),
@@ -467,11 +461,7 @@ def format_plot_data(queryset, period):
     plot_data = [
         dict(
             x=[_[period] for _ in reversed_qs if _["dizimista__igreja__nome"] == i],
-            y=[
-                float(_["total_recebido"])
-                for _ in reversed_qs
-                if _["dizimista__igreja__nome"] == i
-            ],
+            y=[float(_["total_recebido"]) for _ in reversed_qs if _["dizimista__igreja__nome"] == i],
             type="bar",
             name=i,
         )
@@ -498,6 +488,8 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
             request,
             extra_context=extra_context,
         )
+        if response.context_data is None:
+            return response
         try:
             queryset = response.context_data["cl"].queryset
         except (AttributeError, KeyError):
@@ -509,9 +501,7 @@ class ResumoPagamentosAdmin(admin.ModelAdmin, GroupByDateListFilter):
             queryset = group_date_by_periord(queryset, period)
             plot_data = format_plot_data(queryset, period)
             response.context_data["plot_data"] = plot_data
-            response.context_data["xaxis"] = dict(
-                title=period.title(), tickformat=date_format
-            )
+            response.context_data["xaxis"] = dict(title=period.title(), tickformat=date_format)
             response.context_data["yaxis"] = dict(title="Total Recebido (R$)")
             response.context_data["plot_id"] = "chart"
             response.context_data["data"] = queryset
