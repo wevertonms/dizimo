@@ -23,12 +23,12 @@ RUN pip install -r requirements.txt
 COPY . /app/
 
 # Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["gunicorn", "dizimo.wsgi:application", "--bind", "0.0.0.0:8000"]
