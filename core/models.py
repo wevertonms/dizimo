@@ -13,11 +13,15 @@ blank_opts = dict(blank=True, null=True)
 
 
 class Perfil(models.Model):
-    user = models.OneToOneField(User, verbose_name="Usuário", on_delete=models.CASCADE, **blank_opts)
+    user = models.OneToOneField(
+        User, verbose_name="Usuário", on_delete=models.CASCADE, **blank_opts
+    )
     nome = models.CharField("Nome completo", max_length=50)
     endereco = models.CharField("Endereço", max_length=255, **blank_opts)
     nascimento = models.DateField("Data de nascimento", **blank_opts)
-    genero = models.CharField("Gênero", max_length=1, choices=GENEROS, default=FEMININO[0])
+    genero = models.CharField(
+        "Gênero", max_length=1, choices=GENEROS, default=FEMININO[0]
+    )
     telefone = models.CharField("Telefone", max_length=20, **blank_opts)
     email = models.EmailField("Email", **blank_opts)
 
