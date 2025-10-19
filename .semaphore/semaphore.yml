@@ -25,6 +25,7 @@ global_job_config:
   prologue:
     commands:
       # Set the python version.
+      - sem-version python 3.11
       # See https://docs.semaphoreci.com/article/132-sem-service-managing-databases-and-services-on-linux
       # Install Linux dependencies.
       - sudo apt-get update && sudo apt-get install -y build-essential libpq-dev
@@ -48,8 +49,18 @@ global_job_config:
 # commands to execute.
 # See https://docs.semaphoreci.com/article/62-concepts
 blocks:
-  - name: "Install Dependencies"
+  - name: "Code Quality and Tests"
     task:
       jobs:
         - name: Run linter
+          commands:
             - uv run ruff check .
+
+        - name: Run tests
+          commands:
+            - uv run pytest --junitxml=junit.xml
+
+      epilogue:
+        always:
+          commands:
+            - test-results publish junit.xml
