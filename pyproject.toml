@@ -1,25 +1,25 @@
 [project]
-authors = [{ name = "Weverton Marques", email = "wevertonms@gmail.com" }]
-requires-python = "<4.0,>=3.10"
-dependencies = [
-    "django>=5.2.7",
-    "django-jazzmin>=3.0.1",
-    "gunicorn>=23.0.0",
-    "whitenoise>=6.11.0",
-    "django-environ>=0.12.0",
-    "psycopg[binary]>=3.2.10",
-    "pdfkit>=1.0.0",
-]
 name = "dizimo"
 version = "0.1.0"
 description = "Sistema de gestão de dizimo"
+requires-python = "<4.0,>=3.10"
+authors = [{ name = "Weverton Marques", email = "wevertonms@gmail.com" }]
+dependencies = [
+  "django>=5.2.7",
+  "django-environ>=0.12.0",
+  "django-jazzmin>=3.0.1",
+  "gunicorn>=23.0.0",
+  "pdfkit>=1.0.0",
+  "psycopg[binary]>=3.2.10",
+  "whitenoise>=6.11.0",
+]
 
 [dependency-groups]
 dev = [
-    "faker<5.0.0,>=4.1.2",
-    "ipython<8.0.0,>=7.18.1",
-    "pytest-django>=4.11.1",
-    "ruff>=0.14.1",
+  "faker<5.0.0,>=4.1.2",
+  "ipython<8.0.0,>=7.18.1",
+  "pytest-django>=4.11.1",
+  "ruff>=0.14.1",
 ]
 typing = ["django-types>=0.20.0"]
 
@@ -34,4 +34,10 @@ envfile = ".env"
 mm = { cmd = "python manage.py makemigrations", help = "python manage.py makemigrations" }
 mi = { cmd = "python manage.py migrate", help = "python manage.py migrate" }
 cs = { cmd = "python manage.py collectstatic --noinput", help = "python manage.py collectstatic --noinput" }
-run = { cmd = "./entrypoint.sh python manage.py runserver", help = "python manage.py collectstatic --noinput" }
+run = { cmd = "./entrypoint.sh python manage.py runserver", help = "python manage.py runserver" }
+
+[tool.pytest]
+[tool.pytest.ini_options]
+# -- recommended but optional:
+python_files = ["test_*.py", "*_test.py", "tests.py"]
+DJANGO_SETTINGS_MODULE = "dizimo.settings"
