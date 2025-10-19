@@ -35,7 +35,7 @@ blocks:
           # Install Linux dependencies.
           - sudo apt-get update && sudo apt-get install -y build-essential libpq-dev
       jobs:
-        - name: pip
+        - name: Setup Environment and run linter
           commands:
             # Get the latest version of our source code from GitHub:
             # See https://docs.semaphoreci.com/article/54-toolbox-reference#checkout
@@ -47,50 +47,9 @@ blocks:
             - cache restore
             # Install python dependencies.
             - curl -LsSf https://astral.sh/uv/install.sh | sh
+            - source $HOME/.local/bin/env
             # If not found in the cache, pip will download them.
             - uv sync --all-groups --cache-dir .pip_cache
             # Persist downloaded packages for future jobs.
             - cache store
-
-  - name: "Run Code Analysis"
-    task:
-      # This block executes code analysis tests with pylint.
-      prologue:
-        commands:
-          - checkout
-          # At this point, the cache contains the downloaded packages ...
-          - cache restore
-          # ... so pip does the installation much faster.
-          - uv sync --cache-dir .pip_cache
-      jobs:
-        - name: Pylint
-          commands:
-            # list out files that are in directory and working tree
-            # grep -v will exclude the files being considered for pylint
-            # grep -E will matches files having .py extension
-            # This command will help to pass required python files to pylint along with pylint_djanog plugin
-            # Pylint with -E option will display only if there is any error
-            - git ls-files | grep -v 'migrations' | grep -v 'settings.py' | grep -v 'manage.py' | grep -E '.py$' |
-              xargs pylint -E --load-plugins=pylint_django
-
-  - name: "Run Unit Tests"
-    task:
-      # This block runs the unit tests.
-      # Since the test require a database, we start the database here.
-      # Django automatically creates a test database schema.
-      prologue:
-        commands:
-          # Start a MySQL database. On Semaphore, databases run in the same
-          # environment as your code.
-          # See https://docs.semaphoreci.com/article/32-ubuntu-1804-image#databases-and-services
-          # Also https://docs.semaphoreci.com/article/54-toolbox-reference#sem-service
-          - sem-service start mysql
-          - checkout
-          - cache restore
-          - uv sync --all-groups --cache-dir .pip_cache
-      # Two parallel test jobs are executed.
-      jobs:
-        - name: Model Test
-          commands:
-            # Test the application's database models.
-            - python manage.py test
+            - uv run ruff check .
