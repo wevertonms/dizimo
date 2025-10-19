@@ -47,13 +47,16 @@ global_job_config:
 # commands to execute.
 # See https://docs.semaphoreci.com/article/62-concepts
 blocks:
-  - name: "Code Quality and Tests"
+  - name: "Lint"
     task:
       jobs:
         - name: Run linter
           commands:
             - uv run ruff check .
 
+  - name: "Tests"
+    task:
+      jobs:
         - name: Run tests
           commands:
             - uv run pytest --junitxml=junit.xml
