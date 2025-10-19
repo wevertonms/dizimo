@@ -15,7 +15,11 @@ version = "0.1.0"
 description = "Sistema de gestão de dizimo"
 
 [dependency-groups]
-dev = ["faker<5.0.0,>=4.1.2", "ipython<8.0.0,>=7.18.1"]
+dev = [
+    "faker<5.0.0,>=4.1.2",
+    "ipython<8.0.0,>=7.18.1",
+    "ruff>=0.14.1",
+]
 typing = ["django-types>=0.20.0"]
 
 [build-system]
